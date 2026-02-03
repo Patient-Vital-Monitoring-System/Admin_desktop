@@ -18,8 +18,6 @@
             transition: left 0.3s ease;
             z-index: 1000;
             padding-top: 60px;
-            overflow-y: auto;
-            overflow-x: hidden;
         }
         
         .sidebar.active {
@@ -41,9 +39,6 @@
             text-decoration: none;
             transition: background-color 0.3s ease;
             border-left: 4px solid transparent;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
         
         .sidebar ul li a:hover {
@@ -59,7 +54,6 @@
             cursor: pointer;
             background: none;
             border: none;
-            padding: 0;
         }
         
         .burger-icon span {
