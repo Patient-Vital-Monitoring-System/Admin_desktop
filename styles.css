@@ -1,0 +1,84 @@
+ * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: -250px;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background-color: #2c3e50;
+            transition: left 0.3s ease;
+            z-index: 1000;
+            padding-top: 60px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        .sidebar.active {
+            left: 0;
+        }
+        
+        .sidebar ul {
+            list-style: none;
+        }
+        
+        .sidebar ul li {
+            padding: 0;
+        }
+        
+        .sidebar ul li a {
+            display: block;
+            padding: 15px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            border-left: 4px solid transparent;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .sidebar ul li a:hover {
+            background-color: #34495e;
+            border-left-color: #3498db;
+        }
+        
+        .burger-icon {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 999;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+        
+        .burger-icon span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: #2c3e50;
+            margin: 5px 0;
+            transition: 0.3s;
+        }
+        
+        .burger-icon.active span:nth-child(1) {
+            transform: rotate(-45deg) translate(-8px, 8px);
+        }
+        
+        .burger-icon.active span:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .burger-icon.active span:nth-child(3) {
+            transform: rotate(45deg) translate(-8px, -8px);
+        }
