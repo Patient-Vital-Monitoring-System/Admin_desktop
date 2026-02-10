@@ -1,0 +1,25 @@
+{
+  "name": "patient_vital_monotoring_admin",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/Patient-Vital-Monitoring-System/Patient_Vital_Monotoring_Admin#readme",
+  "bugs": {
+    "url": "https://github.com/Patient-Vital-Monitoring-System/Patient_Vital_Monotoring_Admin/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Patient-Vital-Monitoring-System/Patient_Vital_Monotoring_Admin.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder "
+  },
+  "devDependencies": {
+    "builder": "^5.0.0",
+    "electron": "^40.2.1"
+  }
+}
