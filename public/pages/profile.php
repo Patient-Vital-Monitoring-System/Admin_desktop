@@ -21,11 +21,12 @@
                 <a class="nav-link" href="index.php">Home</a>
                 <a class="nav-link" href="patients.php">Patient Records</a>
                 <a class="nav-link" href="vitals.php">Vitals Reports</a>
+                <a class="nav-link" href="vitals_analytics.php">Vital Statistics</a>
                 <a class="nav-link" href="incidents.php">Incident Monitoring</a>
                 <a class="nav-link" href="device_incidents.php">Device Tracking</a>
                 <a class="nav-link" href="audit_log.php">Activity Log</a>
                 <a class="nav-link" href="alerts.php">Alert Records</a>
-                <a class="nav-link active" href="profile.php">Profile</a>
+                <a class="nav-link" href="profile.php">Profile</a>
                 <a class="nav-link" href="logout.php">Logout</a>
             </nav>
         </aside>
