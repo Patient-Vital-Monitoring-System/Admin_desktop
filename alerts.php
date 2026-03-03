@@ -24,24 +24,24 @@
         </div>
         <div class="offcanvas-body">
             <nav class="navbar-nav flex-column">
-                <a class="nav-link" href="index.html">Home</a>
-                <a class="nav-link" href="patients.html">Patient Records</a>
-                <a class="nav-link" href="vitals.html">Vitals Reports</a>
-                <a class="nav-link" href="alerts.html">Alert Records</a>
-                <a class="nav-link" href="profile.html">Profile</a>
-                <a class="nav-link" href="logout.html">Logout</a>
+                <a class="nav-link" href="index.php">Home</a>
+                <a class="nav-link" href="patients.php">Patient Records</a>
+                <a class="nav-link" href="vitals.php">Vitals Reports</a>
+                <a class="nav-link" href="alerts.php">Alert Records</a>
+                <a class="nav-link" href="profile.php">Profile</a>
+                <a class="nav-link" href="logout.php">Logout</a>
             </nav>
         </div>
     </div>
 
-   <h1>Profile Page</h1>
-    <p>This is a placeholder for the Profile page where you can view and update user profile information.</p>
-
+   <h1>Alert Records Page</h1>
+    <p>This is a placeholder for the Alert Records page where you can view and manage patient alerts.</p>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
     <script>
         if (!localStorage.getItem('vw_token')) {
-            window.location.href = 'login.html';
+            window.location.href = 'login.php';
         }
     </script>
 </body>

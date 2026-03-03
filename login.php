@@ -120,21 +120,23 @@ async function doLogin() {
   const password = document.getElementById('login-pass').value;
 
   try {
-    const res = await fetch('http://localhost/vitalwear/api/auth/login.php', {
+    const res = await fetch('api/auth/login.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, role: currentRole })
     });
     const json = await res.json();
     if (!json.success) {
-      alert(json.error || 'Login failed');
+      // show any error details for debugging
+      console.error('login error', json);
+      alert((json.error||'Login failed') + (json.details? '\nDetails: '+json.details : ''));
       return;
     }
     // this demo page just redirects on success
     window.location.href = 'index.html';
   } catch (err) {
-    console.error(err);
-    alert('Unable to reach server.');
+    console.error('fetch error', err);
+    alert('Unable to reach server. Make sure you are running via http://localhost/Admin_desktop/login.php');
   }
 }
 </script>
