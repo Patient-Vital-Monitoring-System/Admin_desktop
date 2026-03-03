@@ -102,6 +102,8 @@ try {
     $staff = array_merge($responders, $rescuers);
 } catch (Exception $e) {
     error_log('Staff query failed: ' . $e->getMessage());
+}
+?>
                 <form action="" method="GET">
                     <input type="text" name="search" placeholder="Search by name..." value="<?php echo htmlspecialchars($search); ?>" class="search-input">
                     <button type="submit" class="search-button">Search</button>
@@ -120,7 +122,7 @@ try {
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if (empty($patients)): ?>
+                            <?php if (empty($staff)): ?>
                                 <tr>
                                     <td colspan="4">No staff found.</td>
                                 </tr>
