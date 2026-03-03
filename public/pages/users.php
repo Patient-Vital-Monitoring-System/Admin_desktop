@@ -145,12 +145,10 @@
                                             <td style="color: #888; font-size: 12px;">
                                                 <?php echo getLastLoginDisplay($user['last_login'] ?? null); ?>
                                             </td>
-                                            <td>
-                                                <div class="action-buttons">
-                                                    <button class="btn-action btn-edit" onclick="editUser(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['email']); ?>', '<?php echo htmlspecialchars($user['role']); ?>')">Edit</button>
-                                                    <button class="btn-action btn-disable" onclick="disableUser(<?php echo $user['id']; ?>)">Disable</button>
-                                                    <button class="btn-action btn-reset" onclick="resetPassword(<?php echo $user['id']; ?>)">Reset Pass</button>
-                                                </div>
+                                            <td style="white-space: nowrap;">
+                                                <button type="button" style="background: #6b7280; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 4px; font-size: 12px;" onclick="viewUserDetails(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['email']); ?>', '<?php echo htmlspecialchars($user['role']); ?>', '<?php echo htmlspecialchars($user['name'] ?? ''); ?>', '<?php echo htmlspecialchars($user['status'] ?? 'active'); ?>')">View</button>
+                                                <button type="button" style="background: #00e5ff; color: black; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 4px; font-size: 12px; font-weight: bold;" onclick="editUser(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['email']); ?>', '<?php echo htmlspecialchars($user['role']); ?>', '<?php echo htmlspecialchars($user['name'] ?? ''); ?>')">Update</button>
+                                                <button type="button" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;" onclick="deleteUser(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['role']); ?>')">Delete</button>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -211,6 +209,11 @@
                     <input type="hidden" id="userId" value="">
                     
                     <div class="form-group">
+                        <label for="userName">Full Name *</label>
+                        <input type="text" id="userName" name="name" required style="width: 100%; padding: 8px; border: 1px solid #444; border-radius: 4px; background: #222; color: #fff;">
+                    </div>
+
+                    <div class="form-group">
                         <label for="userEmail">Email Address *</label>
                         <input type="email" id="userEmail" name="email" required style="width: 100%; padding: 8px; border: 1px solid #444; border-radius: 4px; background: #222; color: #fff;">
                     </div>
@@ -219,8 +222,8 @@
                         <label for="userRole">Role *</label>
                         <select id="userRole" name="role" required style="width: 100%; padding: 8px; border: 1px solid #444; border-radius: 4px; background: #222; color: #fff;">
                             <option value="">Select a role...</option>
-                            <option value="admin">Admin</option>
                             <option value="staff">Staff</option>
+                            <option value="admin">Admin</option>
                             <option value="responder">Responder</option>
                             <option value="rescuer">Rescuer</option>
                         </select>
@@ -229,7 +232,7 @@
                     <div class="form-group" id="passwordGroup">
                         <label for="userPassword">Password *</label>
                         <input type="password" id="userPassword" name="password" required style="width: 100%; padding: 8px; border: 1px solid #444; border-radius: 4px; background: #222; color: #fff;">
-                        <small style="color: #888;">Leave blank to keep existing password</small>
+                        <small style="color: #888;">Leave blank to keep existing password when editing</small>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -299,9 +302,10 @@
         }
 
         // Edit User
-        function editUser(id, email, role) {
+        function editUser(id, email, role, name) {
             document.getElementById('formTitle').textContent = 'Edit User';
             document.getElementById('userId').value = id;
+            document.getElementById('userName').value = name || '';
             document.getElementById('userEmail').value = email;
             document.getElementById('userRole').value = role;
             document.getElementById('passwordGroup').style.display = 'none';
@@ -310,19 +314,70 @@
         }
 
         // Handle Form Submit
-        function handleUserFormSubmit(event) {
+        async function handleUserFormSubmit(event) {
             event.preventDefault();
             const userId = document.getElementById('userId').value;
+            const name = document.getElementById('userName').value;
             const email = document.getElementById('userEmail').value;
             const role = document.getElementById('userRole').value;
             const password = document.getElementById('userPassword').value;
 
-            if (userId) {
-                alert('Updating user: ' + email);
-            } else {
-                alert('Creating new user: ' + email);
+            try {
+                if (userId) {
+                    // Update existing user
+                    const response = await fetch('../../api/auth/update_user.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id: userId,
+                            name: name,
+                            email: email,
+                            role: role,
+                            password: password
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('User updated successfully!');
+                        closeUserFormModal();
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + result.error);
+                    }
+                } else {
+                    // Create new user using the new create_user API
+                    const response = await fetch('../../api/auth/create_user.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            name: name,
+                            email: email,
+                            password: password,
+                            role: role
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    console.log('Create result:', result);
+                    
+                    if (result.success) {
+                        alert('User created successfully!');
+                        closeUserFormModal();
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + (result.error || 'Failed to create user'));
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
             }
-            closeUserFormModal();
         }
 
         // Filter by Role
@@ -352,10 +407,39 @@
             alert((isActive ? 'Activating' : 'Deactivating') + ' user ID: ' + id);
         }
 
-        // Disable User
-        function disableUser(id) {
-            if (confirm('Are you sure you want to disable this user?')) {
-                alert('User ' + id + ' has been disabled');
+        // Delete User
+        async function deleteUser(id, role) {
+            console.log('Delete called - ID:', id, 'Role:', role);
+            if (confirm('Are you sure you want to permanently delete this user?')) {
+                try {
+                    const response = await fetch('../../api/auth/delete_user.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ id: id, role: role })
+                    });
+                    
+                    console.log('Response status:', response.status);
+                    const result = await response.json();
+                    console.log('Delete result:', result);
+                    
+                    if (result.success) {
+                        alert('User deleted successfully!');
+                        // Remove the row from the table
+                        const row = document.querySelector(`.user-row[data-user-id="${id}"]`);
+                        if (row) {
+                            row.remove();
+                        }
+                        // Optionally reload the page
+                        // window.location.reload();
+                    } else {
+                        alert('Error: ' + result.error);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                }
             }
         }
 
@@ -510,13 +594,21 @@
             background: rgba(0, 229, 255, 0.25);
         }
 
-        .btn-disable {
+        .btn-view {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .btn-view:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .btn-delete {
             background: rgba(255, 77, 109, 0.15);
             color: #ff4d6d;
             border: 1px solid rgba(255, 77, 109, 0.3);
         }
 
-        .btn-disable:hover {
+        .btn-delete:hover {
             background: rgba(255, 77, 109, 0.25);
         }
 

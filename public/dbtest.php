@@ -1,6 +1,6 @@
 <?php
 // quick database connectivity check
-require_once __DIR__ . '/api/auth/config.php';
+require_once __DIR__ . '/../api/auth/config.php';
 
 header('Content-Type: text/plain');
 if (isset($pdo)) {
