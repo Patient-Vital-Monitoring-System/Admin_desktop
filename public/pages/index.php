@@ -19,16 +19,23 @@
                 <h5 class="sidebar-title">Menu</h5>
             </div>
             <nav class="sidebar-nav">
-                <a class="nav-link active" href="index.php">Home</a>
-                <a class="nav-link" href="patients.php">Patient Records</a>
-                <a class="nav-link" href="vitals.php">Vitals Reports</a>
-                <a class="nav-link" href="vitals_analytics.php">Vital Statistics</a>
-                <a class="nav-link" href="incidents.php">Incident Monitoring</a>
-                <a class="nav-link" href="device_incidents.php">Device Tracking</a>
-                <a class="nav-link" href="audit_log.php">Activity Log</a>
+                <a class="nav-link active" href="index.php">Dashboard</a>
+
+                <!-- User Management -->
+                <a class="nav-link" href="patients.php">User Management</a>
                 <a class="nav-link" href="user_status.php">User Status</a>
+
+                <!-- Monitoring -->
+                <a class="nav-link" href="incidents.php">Incident Monitoring</a>
+                <a class="nav-link" href="device_incidents.php">Device Overview</a>
+
+                <!-- Reports -->
+                <a class="nav-link" href="vitals_analytics.php">Vital Statistics</a>
+                <a class="nav-link" href="audit_log.php">System Activity Log</a>
+
+                <!-- Account -->
                 <a class="nav-link" href="profile.php">Profile</a>
-                <a class="nav-link" href="logout.php">Logout</a>
+                <a class="nav-link" href="logout.php" style="color: #ff4d6d;">Logout</a>
             </nav>
         </aside>
 
