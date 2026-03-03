@@ -26,21 +26,21 @@ $highBpQuery->execute();
 $highBpData = $highBpQuery->fetch(PDO::FETCH_ASSOC);
 $highBpCount = $highBpData['high_bp_count'];
 
-// Get peak hour of incidents
+// Get peak hour based on vital readings (vitalstat.recorded_at)
 $peakHourQuery = $pdo->prepare("
     SELECT 
-        HOUR(start_time) as hour,
-        COUNT(*) as incident_count
-    FROM incident
-    WHERE MONTH(start_time) = MONTH(CURDATE())
-    AND YEAR(start_time) = YEAR(CURDATE())
-    GROUP BY HOUR(start_time)
-    ORDER BY incident_count DESC
+        HOUR(recorded_at) AS peak_hour,
+        COUNT(*) AS total
+    FROM vitalstat
+    WHERE MONTH(recorded_at) = MONTH(CURDATE())
+      AND YEAR(recorded_at) = YEAR(CURDATE())
+    GROUP BY HOUR(recorded_at)
+    ORDER BY total DESC
     LIMIT 1
 ");
 $peakHourQuery->execute();
 $peakHourData = $peakHourQuery->fetch(PDO::FETCH_ASSOC);
-$peakHour = $peakHourData ? $peakHourData['hour'] : 0;
+$peakHour = $peakHourData ? (int)$peakHourData['peak_hour'] : null;
 
 // Get monitoring frequency (avg readings per day)
 $monitoringFreqQuery = $pdo->prepare("
@@ -70,15 +70,15 @@ $bpTrendQuery = $pdo->prepare("
 $bpTrendQuery->execute();
 $bpTrends = array_reverse($bpTrendQuery->fetchAll(PDO::FETCH_ASSOC));
 
-// Get incident distribution by hour
+// Get distribution of vital readings by hour (based on vitalstat.recorded_at)
 $incidentHourlyQuery = $pdo->prepare("
     SELECT 
-        HOUR(start_time) as hour,
+        HOUR(recorded_at) as hour,
         COUNT(*) as incident_count
-    FROM incident
-    WHERE YEAR(start_time) = YEAR(CURDATE())
-    AND MONTH(start_time) = MONTH(CURDATE())
-    GROUP BY HOUR(start_time)
+    FROM vitalstat
+    WHERE YEAR(recorded_at) = YEAR(CURDATE())
+      AND MONTH(recorded_at) = MONTH(CURDATE())
+    GROUP BY HOUR(recorded_at)
     ORDER BY hour ASC
 ");
 $incidentHourlyQuery->execute();
@@ -98,6 +98,7 @@ $vitalDistQuery->execute();
 $vitalDist = $vitalDistQuery->fetch(PDO::FETCH_ASSOC);
 
 // Get detailed vital statistics table
+// Show only the latest reading per patient for this month to avoid repeated rows.
 $vitalTableQuery = $pdo->prepare("
     SELECT 
         p.pat_name,
@@ -112,9 +113,21 @@ $vitalTableQuery = $pdo->prepare("
             WHEN v.bp_systolic > 140 OR v.bp_diastolic > 90 THEN 'High'
         END as bp_status
     FROM vitalstat v
-    JOIN patient p ON v.pat_id = p.pat_id
+    JOIN incident i ON v.incident_id = i.incident_id
+    JOIN patient p ON i.pat_id = p.pat_id
+    INNER JOIN (
+        SELECT 
+            i2.pat_id,
+            MAX(v2.recorded_at) AS latest_recorded_at
+        FROM vitalstat v2
+        JOIN incident i2 ON v2.incident_id = i2.incident_id
+        WHERE MONTH(v2.recorded_at) = MONTH(CURDATE())
+          AND YEAR(v2.recorded_at) = YEAR(CURDATE())
+        GROUP BY i2.pat_id
+    ) lv ON i.pat_id = lv.pat_id
+       AND v.recorded_at = lv.latest_recorded_at
     WHERE MONTH(v.recorded_at) = MONTH(CURDATE())
-    AND YEAR(v.recorded_at) = YEAR(CURDATE())
+      AND YEAR(v.recorded_at) = YEAR(CURDATE())
     ORDER BY v.recorded_at DESC
     LIMIT 50
 ");
@@ -229,7 +242,7 @@ $vitalTableData = $vitalTableQuery->fetchAll(PDO::FETCH_ASSOC);
                         </div>
                         <div style="margin-top: 16px;">
                             <div style="font-size: 32px; font-weight: bold; color: #39ff14;">
-                                <?php echo str_pad($peakHour, 2, '0', STR_PAD_LEFT) . ":00"; ?>
+                                <?php echo $peakHour !== null ? date('g A', mktime((int)$peakHour, 0)) : 'N/A'; ?>
                             </div>
                             <p style="margin: 8px 0 0 0; color: #718096; font-size: 13px;">
                                 Most incidents occur around this time
@@ -312,7 +325,7 @@ $vitalTableData = $vitalTableQuery->fetchAll(PDO::FETCH_ASSOC);
                                     </span>
                                 </td>
                                 <td style="padding: 12px; text-align: center; color: #718096; font-size: 12px; white-space: nowrap;">
-                                    <?php echo date('M d, H:i', strtotime($vital['recorded_at'])); ?>
+                                    <?php echo date('M d, g:i A', strtotime($vital['recorded_at'])); ?>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -407,9 +420,9 @@ $vitalTableData = $vitalTableQuery->fetchAll(PDO::FETCH_ASSOC);
         new Chart(incidentCtx, {
             type: 'bar',
             data: {
-                labels: [<?php foreach ($incidentHourly as $ih) echo "'" . str_pad($ih['hour'], 2, '0', STR_PAD_LEFT) . ":00', "; ?>],
+                labels: [<?php foreach ($incidentHourly as $ih) echo "'" . date('g A', mktime((int)$ih['hour'], 0)) . "', "; ?>],
                 datasets: [{
-                    label: 'Incident Count',
+                    label: 'Readings Count',
                     data: [<?php foreach ($incidentHourly as $ih) echo $ih['incident_count'] . ", "; ?>],
                     backgroundColor: '#00e5ff',
                     borderColor: '#00c9e8',
