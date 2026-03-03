@@ -26,7 +26,6 @@
                 <a class="nav-link" href="incidents.php">Incident Monitoring</a>
                 <a class="nav-link" href="device_incidents.php">Device Tracking</a>
                 <a class="nav-link" href="audit_log.php">Activity Log</a>
-                <a class="nav-link" href="alerts.php">Alert Records</a>
                 <a class="nav-link" href="user_status.php">User Status</a>
                 <a class="nav-link" href="profile.php">Profile</a>
                 <a class="nav-link" href="logout.php">Logout</a>

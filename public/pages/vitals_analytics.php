@@ -104,7 +104,6 @@ $vitalTableQuery = $pdo->prepare("
         v.bp_systolic,
         v.bp_diastolic,
         v.heart_rate,
-        v.temperature,
         v.oxygen_level,
         v.recorded_at,
         CASE 
@@ -150,7 +149,7 @@ $vitalTableData = $vitalTableQuery->fetchAll(PDO::FETCH_ASSOC);
                 <a class="nav-link" href="incidents.php">Incident Monitoring</a>
                 <a class="nav-link" href="device_incidents.php">Device Tracking</a>
                 <a class="nav-link" href="audit_log.php">Activity Log</a>
-                <a class="nav-link" href="alerts.php">Alert Records</a>
+
                 <a class="nav-link" href="user_status.php">User Status</a>
                 <a class="nav-link" href="profile.php">Profile</a>
                 <a class="nav-link" href="logout.php">Logout</a>
@@ -262,7 +261,6 @@ $vitalTableData = $vitalTableQuery->fetchAll(PDO::FETCH_ASSOC);
                                 <th style="padding: 12px; text-align: center; color: #a0aec0; font-weight: 600; white-space: nowrap;">Systolic</th>
                                 <th style="padding: 12px; text-align: center; color: #a0aec0; font-weight: 600; white-space: nowrap;">Diastolic</th>
                                 <th style="padding: 12px; text-align: center; color: #a0aec0; font-weight: 600; white-space: nowrap;">Heart Rate</th>
-                                <th style="padding: 12px; text-align: center; color: #a0aec0; font-weight: 600; white-space: nowrap;">Temp (°F)</th>
                                 <th style="padding: 12px; text-align: center; color: #a0aec0; font-weight: 600; white-space: nowrap;">O₂ Level (%)</th>
                                 <th style="padding: 12px; text-align: center; color: #a0aec0; font-weight: 600; white-space: nowrap;">BP Status</th>
                                 <th style="padding: 12px; text-align: center; color: #a0aec0; font-weight: 600; white-space: nowrap;">Recorded</th>
@@ -275,7 +273,6 @@ $vitalTableData = $vitalTableQuery->fetchAll(PDO::FETCH_ASSOC);
                                 <td style="padding: 12px; text-align: center; color: #e2e8f0;"><?php echo intval($vital['bp_systolic']); ?></td>
                                 <td style="padding: 12px; text-align: center; color: #e2e8f0;"><?php echo intval($vital['bp_diastolic']); ?></td>
                                 <td style="padding: 12px; text-align: center; color: #e2e8f0;"><?php echo intval($vital['heart_rate']); ?> bpm</td>
-                                <td style="padding: 12px; text-align: center; color: #e2e8f0;"><?php echo number_format($vital['temperature'], 1); ?></td>
                                 <td style="padding: 12px; text-align: center; color: #e2e8f0;"><?php echo intval($vital['oxygen_level']); ?></td>
                                 <td style="padding: 12px; text-align: center;">
                                     <?php 

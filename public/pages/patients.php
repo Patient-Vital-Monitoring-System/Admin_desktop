@@ -25,7 +25,6 @@
                 <a class="nav-link" href="incidents.php">Incident Monitoring</a>
                 <a class="nav-link" href="device_incidents.php">Device Tracking</a>
                 <a class="nav-link" href="audit_log.php">Activity Log</a>
-                <a class="nav-link" href="alerts.php">Alert Records</a>
                 <a class="nav-link" href="user_status.php">User Status</a>
                 <a class="nav-link" href="profile.php">Profile</a>
                 <a class="nav-link" href="logout.php">Logout</a>
@@ -36,6 +35,70 @@
             <div style="padding: 32px 20px; max-width: 1200px; margin: 0 auto; width: 100%;">
             <h1>Patient Records</h1>
             <p>View and manage all patient information and medical records below.</p>
+
+            <?php
+            require_once __DIR__ . '/../../api/auth/config.php';
+
+            $search = $_GET['search'] ?? '';
+
+            $patients = [];
+            try {
+                $query = "SELECT pat_id, pat_name, pat_age, pat_sex, pat_contact FROM patient";
+                if ($search) {
+                    $query .= " WHERE pat_name LIKE :search";
+                }
+                $stmt = $pdo->prepare($query);
+                if ($search) {
+                    $stmt->execute(['search' => "%$search%"]);
+                } else {
+                    $stmt->execute();
+                }
+                $patients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (Exception $e) {
+                error_log('Patient query failed: ' . $e->getMessage());
+            }
+            ?>
+
+            <div class="search-container" style="margin-bottom: 20px;">
+                <form action="" method="GET">
+                    <input type="text" name="search" placeholder="Search by patient name..." value="<?php echo htmlspecialchars($search); ?>" class="search-input">
+                    <button type="submit" class="search-button">Search</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>Sex</th>
+                                <th>Contact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($patients)): ?>
+                                <tr>
+                                    <td colspan="5">No patients found.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($patients as $patient): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($patient['pat_id']); ?></td>
+                                        <td><?php echo htmlspecialchars($patient['pat_name']); ?></td>
+                                        <td><?php echo htmlspecialchars($patient['pat_age']); ?></td>
+                                        <td><?php echo htmlspecialchars($patient['pat_sex']); ?></td>
+                                        <td><?php echo htmlspecialchars($patient['pat_contact']); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             </div>
         </main>
     </div>

@@ -25,7 +25,6 @@
                 <a class="nav-link" href="incidents.php">Incident Monitoring</a>
                 <a class="nav-link" href="device_incidents.php">Device Tracking</a>
                 <a class="nav-link" href="audit_log.php">Activity Log</a>
-                <a class="nav-link" href="alerts.php">Alert Records</a>
                 <a class="nav-link" href="user_status.php">User Status</a>
                 <a class="nav-link" href="profile.php">Profile</a>
                 <a class="nav-link" href="logout.php">Logout</a>
@@ -33,9 +32,34 @@
         </aside>
 
         <main class="main-content">
-            <div style="padding: 32px 20px; max-width: 1200px; margin: 0 auto; width: 100%;">
+            <div style="padding: 32px 20px; max-width: 800px; margin: 0 auto; width: 100%;">
             <h1>User Profile</h1>
             <p>View and update your account information below.</p>
+
+            <div class="card" style="margin-top: 20px;">
+                <div class="card-body">
+                    <form id="profile-form">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" id="name" name="name" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">New Password</label>
+                            <input type="password" id="password" name="password" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="password_confirm">Confirm New Password</label>
+                            <input type="password" id="password_confirm" name="password_confirm" class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                    </form>
+                </div>
+            </div>
+
             </div>
         </main>
     </div>
@@ -45,6 +69,18 @@
         if (!localStorage.getItem('vw_token')) {
             window.location.href = '../login.php';
         }
+
+        const user = JSON.parse(localStorage.getItem('vw_user'));
+        if (user) {
+            document.getElementById('name').value = user.name;
+            document.getElementById('email').value = user.email;
+        }
+
+        document.getElementById('profile-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Add logic to update profile here
+            alert('Profile update functionality is not implemented yet.');
+        });
     </script>
 </body>
 </html>
