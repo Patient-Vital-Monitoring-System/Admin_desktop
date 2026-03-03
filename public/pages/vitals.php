@@ -1,14 +1,39 @@
 <?php
 require_once __DIR__ . '/../../api/auth/config.php';
-$rows = [];
+$activity_rows = [];
 try {
-    $stmt = $pdo->query("SELECT v.*, i.incident_id, p.pat_name FROM vitalstat v
-        JOIN incident i ON v.incident_id = i.incident_id
-        JOIN patient p ON i.pat_id = p.pat_id
-        ORDER BY v.vital_id DESC");
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Responder-Rescuer Activity: Show incidents handled by each responder/rescuer
+    $stmt = $pdo->query("SELECT 
+                            r.resp_id,
+                            r.resp_name,
+                            r.resp_email,
+                            COUNT(DISTINCT i.incident_id) as incidents_handled,
+                            COUNT(DISTINCT CASE WHEN i.status IN ('active', 'pending') THEN i.incident_id END) as active_incidents,
+                            MAX(i.start_time) as last_activity,
+                            'responder' as role
+                        FROM responder r
+                        LEFT JOIN incident i ON i.resp_id = r.resp_id
+                        GROUP BY r.resp_id, r.resp_name, r.resp_email
+                        ORDER BY incidents_handled DESC");
+    $responders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    $stmt = $pdo->query("SELECT 
+                            rc.resc_id,
+                            rc.resc_name,
+                            rc.resc_email,
+                            COUNT(DISTINCT i.incident_id) as incidents_handled,
+                            COUNT(DISTINCT CASE WHEN i.status IN ('active', 'pending') THEN i.incident_id END) as active_incidents,
+                            MAX(i.start_time) as last_activity,
+                            'rescuer' as role
+                        FROM rescuer rc
+                        LEFT JOIN incident i ON i.resc_id = rc.resc_id
+                        GROUP BY rc.resc_id, rc.resc_name, rc.resc_email
+                        ORDER BY incidents_handled DESC");
+    $rescuers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    $activity_rows = array_merge($responders, $rescuers);
 } catch (Exception $e) {
-    error_log('Vitals query failed: ' . $e->getMessage());
+    error_log('Activity query failed: ' . $e->getMessage());
 }
 ?>
 <!DOCTYPE html>
@@ -16,13 +41,13 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient Vital Monitoring Admin</title>
+    <title>User Activity Monitoring - Admin</title>
     <link rel="stylesheet" href="../css/vitalwear.css">
 </head>
 <body>
 
     <nav class="navbar-top">
-        <h2 class="navbar-brand">Patient Vitals Admin</h2>
+        <h2 class="navbar-brand">User Activity Monitor</h2>
     </nav>
 
     <div class="page-wrapper">
@@ -31,38 +56,69 @@ try {
                 <h5 class="sidebar-title">Menu</h5>
             </div>
             <nav class="sidebar-nav">
-                <a class="nav-link" href="index.php">Home</a>
-                <a class="nav-link" href="patients.php">Patient Records</a>
-                <a class="nav-link active" href="vitals.php">Vitals Reports</a>
-                <a class="nav-link" href="vitals_analytics.php">Vital Statistics</a>
-                <a class="nav-link" href="incidents.php">Incident Monitoring</a>
-                <a class="nav-link" href="device_incidents.php">Device Tracking</a>
-                <a class="nav-link" href="audit_log.php">Activity Log</a>
-                <a class="nav-link" href="user_status.php">User Status</a>
-                <a class="nav-link" href="profile.php">Profile</a>
-                <a class="nav-link" href="logout.php">Logout</a>
+                <a class="nav-link" href="index.php">Dashboard</a>
+
+                <!-- User Management -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">User Management <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="patients.php">Staff Directory</a>
+                        <a class="nav-link" href="user_status.php">User Status</a>
+                    </div>
+                </div>
+
+                <!-- Reports -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Reports <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="vitals_analytics.php">Vital Statistics</a>
+                        <a class="nav-link" href="audit_log.php">System Activity Log</a>
+                    </div>
+                </div>
+
+                <!-- Monitoring -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Monitoring <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="incidents.php">Incident Monitoring</a>
+                        <a class="nav-link" href="device_incidents.php">Device Overview</a>
+                        <a class="nav-link active" href="vitals.php">User Activity</a>
+                    </div>
+                </div>
+
+                <!-- Accounts -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Accounts <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="profile.php">Profile</a>
+                        <a class="nav-link" href="logout.php" style="color: #ff4d6d;">Logout</a>
+                    </div>
+                </div>
             </nav>
         </aside>
 
         <main class="main-content">
             <div style="padding: 32px 20px; max-width: 1200px; margin: 0 auto; width: 100%;">
-            <h1>Vitals Reports Page</h1>
-            <p>View and analyze patient vital statistics below.</p>
-            <?php if (!empty($rows)): ?>
+            <h1>👤 Responder & Rescuer Activity</h1>
+            <p>Track incident involvement and activity levels for all field staff members.</p>
+            <?php if (!empty($activity_rows)): ?>
             <div class="card">
                 <div class="card-body">
                     <table class="table">
-                        <thead><tr><th>ID</th><th>Patient</th><th>Incident</th><th>BP</th><th>HR</th><th>O₂</th><th>Recorded</th></tr></thead>
+                        <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Incidents Handled</th><th>Active</th><th>Last Activity</th></tr></thead>
                         <tbody>
-                            <?php foreach($rows as $r): ?>
+                            <?php foreach($activity_rows as $person): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($r['vital_id']); ?></td>
-                                <td><?php echo htmlspecialchars($r['pat_name']); ?></td>
-                                <td><?php echo htmlspecialchars($r['incident_id']); ?></td>
-                                <td><?php echo htmlspecialchars($r['bp_systolic'].'/'.$r['bp_diastolic']); ?></td>
-                                <td><?php echo htmlspecialchars($r['heart_rate']); ?></td>
-                                <td><?php echo htmlspecialchars($r['oxygen_level']); ?>%</td>
-                                <td><?php echo htmlspecialchars($r['recorded_at'] ?? ''); ?></td>
+                                <td><?php echo htmlspecialchars($person['resp_name'] ?? $person['resc_name']); ?></td>
+                                <td><?php echo htmlspecialchars($person['resp_email'] ?? $person['resc_email']); ?></td>
+                                <td>
+                                    <span style="padding: 4px 8px; border-radius: 4px; background: <?php echo $person['role'] === 'responder' ? '#00e5ff' : '#ff4d6d'; ?>20; color: <?php echo $person['role'] === 'responder' ? '#00e5ff' : '#ff4d6d'; ?>; font-weight: 600;">
+                                        <?php echo htmlspecialchars($person['role']); ?>
+                                    </span>
+                                </td>
+                                <td><?php echo $person['incidents_handled']; ?></td>
+                                <td><?php echo $person['active_incidents']; ?></td>
+                                <td><?php echo $person['last_activity'] ? htmlspecialchars($person['last_activity']) : '<span style="color: var(--muted);">Never</span>'; ?></td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>

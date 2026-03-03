@@ -55,20 +55,41 @@ try {
                 <a class="nav-link" href="index.php">Dashboard</a>
 
                 <!-- User Management -->
-                <a class="nav-link" href="patients.php">User Management</a>
-                <a class="nav-link" href="user_status.php">User Status</a>
-
-                <!-- Monitoring -->
-                <a class="nav-link active" href="incidents.php">Incident Monitoring</a>
-                <a class="nav-link" href="device_incidents.php">Device Overview</a>
+                <div class="nav-group">
+                    <button class="nav-group-toggle">User Management <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="patients.php">Staff Directory</a>
+                        <a class="nav-link" href="user_status.php">User Status</a>
+                    </div>
+                </div>
 
                 <!-- Reports -->
-                <a class="nav-link" href="vitals_analytics.php">Vital Statistics</a>
-                <a class="nav-link" href="audit_log.php">System Activity Log</a>
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Reports <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="vitals_analytics.php">Vital Statistics</a>
+                        <a class="nav-link" href="audit_log.php">System Activity Log</a>
+                    </div>
+                </div>
 
-                <!-- Account -->
-                <a class="nav-link" href="profile.php">Profile</a>
-                <a class="nav-link" href="logout.php" style="color: #ff4d6d;">Logout</a>
+                <!-- Monitoring -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Monitoring <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link active" href="incidents.php">Incident Monitoring</a>
+                        <a class="nav-link" href="device_incidents.php">Device Overview</a>
+                        <a class="nav-link" href="vitals.php">User Activity</a>
+                    </div>
+                </div>
+
+                <!-- Accounts -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Accounts <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="profile.php">Profile</a>
+                        <a class="nav-link" href="logout.php" style="color: #ff4d6d;">Logout</a>
+                    </div>
+                </div>
             </nav>
         </aside>
 
