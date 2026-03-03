@@ -74,7 +74,7 @@
                             <select id="roleFilter" class="filter-select" onchange="filterByRole()">
                                 <option value="">All Roles</option>
                                 <option value="admin">Admin</option>
-                                <option value="staff">Staff</option>
+                                <option value="staff">Management</option>
                                 <option value="responder">Responder</option>
                                 <option value="rescuer">Rescuer</option>
                             </select>
@@ -222,7 +222,7 @@
                         <label for="userRole">Role *</label>
                         <select id="userRole" name="role" required style="width: 100%; padding: 8px; border: 1px solid #444; border-radius: 4px; background: #222; color: #fff;">
                             <option value="">Select a role...</option>
-                            <option value="staff">Staff</option>
+                            <option value="staff">Management</option>
                             <option value="admin">Admin</option>
                             <option value="responder">Responder</option>
                             <option value="rescuer">Rescuer</option>

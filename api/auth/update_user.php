@@ -52,13 +52,14 @@ if (!empty($password)) {
 
 // Try to update the user
 try {
+    // We call updateUser and treat a successful execution as success,
+    // even if no rows were changed (e.g. same data as before).
     $result = updateUser($pdo, $userId, $email, $role, $passwordHash, $name);
-    
-    if ($result) {
-        echo json_encode(['success' => true, 'message' => 'User updated successfully']);
-    } else {
-        echo json_encode(['success' => false, 'error' => 'No changes made or user not found']);
-    }
+
+    echo json_encode([
+        'success' => true,
+        'message' => $result ? 'User updated successfully' : 'No changes were necessary'
+    ]);
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['success' => false, 'error' => 'Failed to update user: ' . $e->getMessage()]);
