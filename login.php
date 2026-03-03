@@ -125,6 +125,16 @@ async function doLogin() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, role: currentRole })
     });
+    if (res.status === 403) {
+      console.error('login request forbidden (403)');
+      alert('Server denied access (403 forbidden) when attempting login.');
+      return;
+    }
+    if (!res.ok) {
+      console.error('login http status', res.status);
+      alert('Login request failed with status ' + res.status);
+      return;
+    }
     const json = await res.json();
     if (!json.success) {
       // show any error details for debugging
@@ -132,8 +142,12 @@ async function doLogin() {
       alert((json.error||'Login failed') + (json.details? '\nDetails: '+json.details : ''));
       return;
     }
-    // this demo page just redirects on success
-    window.location.href = 'index.html';
+    // store session info then navigate to dashboard
+    localStorage.setItem('vw_token', json.data.token);
+    localStorage.setItem('vw_user', JSON.stringify(json.data.user));
+    // redirect to index.php in same folder (avoid path issues)
+    const base = window.location.pathname.replace(/login\.php$/, '');
+    window.location.href = base + 'index.php';
   } catch (err) {
     console.error('fetch error', err);
     alert('Unable to reach server. Make sure you are running via http://localhost/Admin_desktop/login.php');

@@ -1,0 +1,8 @@
+# redirect old HTML pages to their PHP equivalents
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(index|patients|vitals|alerts|profile)\.html$ $1.php [L,R=301]
+
+# redirect any remaining html URLs to php (avoid absolute path)
+RewriteCond %{REQUEST_URI} \.(html)$
+RewriteRule ^(.*)\.html$ $1.php [L,R=301]
