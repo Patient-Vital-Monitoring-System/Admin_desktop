@@ -101,19 +101,12 @@
       <input type="password" id="login-pass" placeholder="Enter password" value="••••••••">
     </div>
     <button class="btn-primary" onclick="doLogin()">ACCESS SYSTEM</button>
-    <div class="hint">Demo credentials: <span id="login-hint">auto‑filled above</span></div>
   </div>
 </div>
 
 <script>
 const currentRole = 'admin';
-// fill demo credentials for admin
-const adminEmail = 'admin@vitalwear.com';
-const adminPwd = 'password';
-document.getElementById('login-email').value = adminEmail;
-document.getElementById('login-pass').value = adminPwd;
-const hint = document.getElementById('login-hint');
-if (hint) hint.textContent = `${adminEmail} / ${adminPwd}`;
+// no demo credentials are prefilled
 
 async function doLogin() {
   const email = document.getElementById('login-email').value;
