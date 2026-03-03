@@ -1,0 +1,330 @@
+<?php
+require_once __DIR__ . '/../../api/auth/config.php';
+
+$audit_logs = [];
+$audit_summary = [];
+
+try {
+    // COMPREHENSIVE AUDIT LOG - All important system actions
+    $stmt = $pdo->query("SELECT 
+                            dl.log_id,
+                            d.dev_serial,
+                            r.resp_name as assigned_to,
+                            m.mgmt_name as assigned_by,
+                            dl.created_at as assignment_date,
+                            CASE WHEN dl.returned_at IS NOT NULL THEN 'Yes' ELSE 'No' END as device_returned,
+                            dl.returned_at,
+                            dl.verification_date,
+                            'Device Assignment' as action_type
+                        FROM device_log dl
+                        JOIN device d ON dl.dev_id = d.dev_id
+                        LEFT JOIN responder r ON dl.resp_id = r.resp_id
+                        LEFT JOIN management m ON dl.mgmt_id = m.mgmt_id
+                        ORDER BY dl.created_at DESC
+                        LIMIT 100");
+    $device_logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // INCIDENT TRANSFER LOG
+    $stmt = $pdo->query("SELECT 
+                            i.incident_id,
+                            p.pat_name,
+                            r.resp_name as transferred_by_responder,
+                            resc.resc_name as transferred_to_rescuer,
+                            i.created_at as incident_created,
+                            i.updated_at as transfer_date,
+                            'Incident Transfer' as action_type
+                        FROM incident i
+                        JOIN patient p ON i.pat_id = p.pat_id
+                        LEFT JOIN responder r ON i.resp_id = r.resp_id
+                        LEFT JOIN rescuer resc ON i.resc_id = resc.resc_id
+                        WHERE i.status = 'transferred'
+                        ORDER BY i.updated_at DESC
+                        LIMIT 100");
+    $transfer_logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // INCIDENT COMPLETION LOG
+    $stmt = $pdo->query("SELECT 
+                            i.incident_id,
+                            p.pat_name,
+                            CASE WHEN i.resp_id IS NOT NULL THEN r.resp_name ELSE resc.resc_name END as completed_by,
+                            i.created_at as incident_created,
+                            i.updated_at as completion_date,
+                            TIMESTAMPDIFF(HOUR, i.created_at, i.updated_at) as duration_hours,
+                            'Incident Completion' as action_type
+                        FROM incident i
+                        JOIN patient p ON i.pat_id = p.pat_id
+                        LEFT JOIN responder r ON i.resp_id = r.resp_id
+                        LEFT JOIN rescuer resc ON i.resc_id = resc.resc_id
+                        WHERE i.status IN ('completed', 'resolved')
+                        ORDER BY i.updated_at DESC
+                        LIMIT 100");
+    $completion_logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // AUDIT SUMMARY STATISTICS
+    $stmt = $pdo->query("SELECT COUNT(*) as total_assignments FROM device_log");
+    $audit_summary['total_assignments'] = $stmt->fetch(PDO::FETCH_ASSOC)['total_assignments'] ?? 0;
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as devices_returned FROM device_log WHERE returned_at IS NOT NULL");
+    $audit_summary['devices_returned'] = $stmt->fetch(PDO::FETCH_ASSOC)['devices_returned'] ?? 0;
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as verifications_completed FROM device_log WHERE verification_date IS NOT NULL");
+    $audit_summary['verifications_completed'] = $stmt->fetch(PDO::FETCH_ASSOC)['verifications_completed'] ?? 0;
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as transfers_completed FROM incident WHERE status = 'transferred'");
+    $audit_summary['transfers_completed'] = $stmt->fetch(PDO::FETCH_ASSOC)['transfers_completed'] ?? 0;
+    
+    $stmt = $pdo->query("SELECT COUNT(*) as completions FROM incident WHERE status IN ('completed', 'resolved')");
+    $audit_summary['completions'] = $stmt->fetch(PDO::FETCH_ASSOC)['completions'] ?? 0;
+    
+    // Return rate calculation
+    $audit_summary['return_rate'] = $audit_summary['total_assignments'] > 0 
+        ? round(($audit_summary['devices_returned'] / $audit_summary['total_assignments']) * 100, 1)
+        : 0;
+    
+    // Verification rate
+    $audit_summary['verification_rate'] = $audit_summary['devices_returned'] > 0 
+        ? round(($audit_summary['verifications_completed'] / $audit_summary['devices_returned']) * 100, 1)
+        : 0;
+    
+} catch (Exception $e) {
+    error_log('Audit log query failed: ' . $e->getMessage());
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Log & Audit Trail - Patient Vital Monitoring Admin</title>
+    <link rel="stylesheet" href="../css/vitalwear.css">
+</head>
+<body>
+
+    <nav class="navbar-top">
+        <h2 class="navbar-brand">Activity Log & Audit Trail</h2>
+    </nav>
+
+    <div class="page-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h5 class="sidebar-title">Menu</h5>
+            </div>
+            <nav class="sidebar-nav">
+                <a class="nav-link" href="index.php">Home</a>
+                <a class="nav-link" href="patients.php">Patient Records</a>
+                <a class="nav-link" href="vitals.php">Vitals Reports</a>
+                <a class="nav-link" href="incidents.php">Incident Monitoring</a>
+                <a class="nav-link" href="device_incidents.php">Device Tracking</a>
+                <a class="nav-link active" href="audit_log.php">Activity Log</a>
+                <a class="nav-link" href="alerts.php">Alert Records</a>
+                <a class="nav-link" href="profile.php">Profile</a>
+                <a class="nav-link" href="logout.php">Logout</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div style="padding: 32px 20px; max-width: 1600px; margin: 0 auto; width: 100%;">
+            <h1>📊 Activity Log & Audit Trail</h1>
+            <p>Complete system audit trail tracking all critical actions, assignments, transfers, and verifications.</p>
+
+            <!-- AUDIT SUMMARY METRICS -->
+            <div class="audit-summary">
+                <div class="audit-metric">
+                    <div class="audit-icon">📝</div>
+                    <div class="audit-value"><?php echo $audit_summary['total_assignments']; ?></div>
+                    <div class="audit-label">Total Assignments</div>
+                </div>
+
+                <div class="audit-metric">
+                    <div class="audit-icon">↩️</div>
+                    <div class="audit-value"><?php echo $audit_summary['devices_returned']; ?></div>
+                    <div class="audit-label">Devices Returned</div>
+                </div>
+
+                <div class="audit-metric">
+                    <div class="audit-icon">✅</div>
+                    <div class="audit-value"><?php echo $audit_summary['verifications_completed']; ?></div>
+                    <div class="audit-label">Verifications</div>
+                </div>
+
+                <div class="audit-metric">
+                    <div class="audit-icon">🔄</div>
+                    <div class="audit-value"><?php echo $audit_summary['transfers_completed']; ?></div>
+                    <div class="audit-label">Transfers</div>
+                </div>
+
+                <div class="audit-metric">
+                    <div class="audit-icon">✓</div>
+                    <div class="audit-value"><?php echo $audit_summary['completions']; ?></div>
+                    <div class="audit-label">Completions</div>
+                </div>
+
+                <div class="audit-metric">
+                    <div class="audit-icon">📊</div>
+                    <div class="audit-value"><?php echo $audit_summary['return_rate']; ?>%</div>
+                    <div class="audit-label">Return Rate</div>
+                </div>
+            </div>
+
+            <!-- DEVICE ASSIGNMENT AUDIT LOG -->
+            <div class="audit-section">
+                <h2>🔑 Device Assignment Audit Log</h2>
+                <p style="margin-bottom: 20px; color: var(--muted);">Track all device assignments, returns, and verifications.</p>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Log ID</th>
+                                    <th>Device Serial</th>
+                                    <th>Assigned To</th>
+                                    <th>Assigned By</th>
+                                    <th>Assignment Date</th>
+                                    <th>Returned</th>
+                                    <th>Return Date</th>
+                                    <th>Verification Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($device_logs as $log): ?>
+                                <tr>
+                                    <td><span class="log-id-badge"><?php echo htmlspecialchars($log['log_id']); ?></span></td>
+                                    <td><?php echo htmlspecialchars($log['dev_serial']); ?></td>
+                                    <td><?php echo $log['assigned_to'] ? htmlspecialchars($log['assigned_to']) : '<span style="color: var(--muted);">N/A</span>'; ?></td>
+                                    <td><?php echo $log['assigned_by'] ? htmlspecialchars($log['assigned_by']) : '<span style="color: var(--muted);">N/A</span>'; ?></td>
+                                    <td><?php echo htmlspecialchars(date('M d, Y H:i', strtotime($log['assignment_date']))); ?></td>
+                                    <td>
+                                        <span class="return-badge <?php echo strtolower($log['device_returned']); ?>">
+                                            <?php echo htmlspecialchars($log['device_returned']); ?>
+                                        </span>
+                                    </td>
+                                    <td><?php echo $log['returned_at'] ? htmlspecialchars(date('M d, Y H:i', strtotime($log['returned_at']))) : '<span style="color: var(--muted);">—</span>'; ?></td>
+                                    <td><?php echo $log['verification_date'] ? htmlspecialchars(date('M d, Y H:i', strtotime($log['verification_date']))) : '<span style="color: var(--muted);">Pending</span>'; ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INCIDENT TRANSFER AUDIT LOG -->
+            <div class="audit-section">
+                <h2>🚑 Incident Transfer Audit Log</h2>
+                <p style="margin-bottom: 20px; color: var(--muted);">Track all incident transfers from responders to rescuers/medical facilities.</p>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Incident ID</th>
+                                    <th>Patient Name</th>
+                                    <th>Transferred By</th>
+                                    <th>Transferred To</th>
+                                    <th>Incident Created</th>
+                                    <th>Transfer Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($transfer_logs as $log): ?>
+                                <tr>
+                                    <td><span class="log-id-badge"><?php echo htmlspecialchars($log['incident_id']); ?></span></td>
+                                    <td><?php echo htmlspecialchars($log['pat_name']); ?></td>
+                                    <td><?php echo $log['transferred_by_responder'] ? htmlspecialchars($log['transferred_by_responder']) : '<span style="color: var(--muted);">N/A</span>'; ?></td>
+                                    <td><?php echo $log['transferred_to_rescuer'] ? htmlspecialchars($log['transferred_to_rescuer']) : '<span style="color: var(--muted);">N/A</span>'; ?></td>
+                                    <td><?php echo htmlspecialchars(date('M d, Y H:i', strtotime($log['incident_created']))); ?></td>
+                                    <td><?php echo htmlspecialchars(date('M d, Y H:i', strtotime($log['transfer_date']))); ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INCIDENT COMPLETION AUDIT LOG -->
+            <div class="audit-section">
+                <h2>✅ Incident Completion Audit Log</h2>
+                <p style="margin-bottom: 20px; color: var(--muted);">Track all completed and resolved incidents with duration and personnel responsible.</p>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Incident ID</th>
+                                    <th>Patient Name</th>
+                                    <th>Completed By</th>
+                                    <th>Created</th>
+                                    <th>Completed</th>
+                                    <th>Duration (hrs)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($completion_logs as $log): ?>
+                                <tr>
+                                    <td><span class="log-id-badge"><?php echo htmlspecialchars($log['incident_id']); ?></span></td>
+                                    <td><?php echo htmlspecialchars($log['pat_name']); ?></td>
+                                    <td><?php echo $log['completed_by'] ? htmlspecialchars($log['completed_by']) : '<span style="color: var(--muted);">N/A</span>'; ?></td>
+                                    <td><?php echo htmlspecialchars(date('M d, Y H:i', strtotime($log['incident_created']))); ?></td>
+                                    <td><?php echo htmlspecialchars(date('M d, Y H:i', strtotime($log['completion_date']))); ?></td>
+                                    <td><?php echo htmlspecialchars($log['duration_hours']); ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMPLIANCE METRICS -->
+            <div class="compliance-section">
+                <h2>🏛️ Compliance Metrics</h2>
+                <div class="compliance-grid">
+                    <div class="compliance-card">
+                        <div class="comp-label">Device Return Compliance</div>
+                        <div class="comp-value"><?php echo $audit_summary['return_rate']; ?>%</div>
+                        <div class="comp-bar">
+                            <div class="comp-bar-fill" style="width: <?php echo $audit_summary['return_rate']; ?>%"></div>
+                        </div>
+                    </div>
+
+                    <div class="compliance-card">
+                        <div class="comp-label">Verification Completion Rate</div>
+                        <div class="comp-value"><?php echo $audit_summary['verification_rate']; ?>%</div>
+                        <div class="comp-bar">
+                            <div class="comp-bar-fill" style="width: <?php echo $audit_summary['verification_rate']; ?>%"></div>
+                        </div>
+                    </div>
+
+                    <div class="compliance-card">
+                        <div class="comp-label">Incident Transfer Compliance</div>
+                        <div class="comp-value">
+                            <?php 
+                            $transfer_rate = $audit_summary['completions'] > 0 
+                                ? round(($audit_summary['transfers_completed'] / $audit_summary['completions']) * 100, 1)
+                                : 0;
+                            echo $transfer_rate;
+                            ?>%
+                        </div>
+                        <div class="comp-bar">
+                            <div class="comp-bar-fill" style="width: <?php echo $transfer_rate; ?>%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        if (!localStorage.getItem('vw_token')) {
+            window.location.href = '../login.php';
+        }
+    </script>
+</body>
+</html>

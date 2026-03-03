@@ -1171,6 +1171,158 @@ tbody tr:last-child td {
   font-family: 'Space Mono', monospace;
 }
 
+/* AUDIT LOG PAGE */
+.audit-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.audit-metric {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.audit-metric:hover {
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(0, 229, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.audit-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.audit-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--accent);
+  font-family: 'Syne', sans-serif;
+  letter-spacing: -0.5px;
+  margin: 8px 0;
+}
+
+.audit-label {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--muted);
+  font-family: 'Space Mono', monospace;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* AUDIT SECTIONS */
+.audit-section {
+  margin-bottom: 40px;
+}
+
+.audit-section h2 {
+  color: var(--accent);
+  font-size: 1.3rem;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.log-id-badge {
+  background: rgba(0, 229, 255, 0.15);
+  color: var(--accent);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+}
+
+.return-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  font-family: 'Space Mono', monospace;
+  text-transform: uppercase;
+}
+
+.return-badge.yes {
+  background: rgba(57, 255, 20, 0.2);
+  color: #39ff14;
+  border: 1px solid #39ff14;
+}
+
+.return-badge.no {
+  background: rgba(255, 77, 109, 0.2);
+  color: #ff4d6d;
+  border: 1px solid #ff4d6d;
+}
+
+/* COMPLIANCE SECTION */
+.compliance-section {
+  margin-top: 40px;
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.compliance-section h2 {
+  color: var(--accent);
+  font-size: 1.3rem;
+  margin-bottom: 24px;
+  letter-spacing: -0.5px;
+}
+
+.compliance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.compliance-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.comp-label {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  font-family: 'Space Mono', monospace;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.comp-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--accent);
+  font-family: 'Syne', sans-serif;
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+}
+
+.comp-bar {
+  height: 8px;
+  background: rgba(0, 229, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.comp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transition: width 0.3s ease;
+}
+
 /* DASHBOARD TABS */
 .dashboard-tabs {
   display: flex;
