@@ -753,6 +753,68 @@ tbody tr:last-child td {
   margin: 40px 0;
 }
 
+/* User Status summary layout */
+.status-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.status-summary-card {
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 12px 14px 10px;
+}
+
+.status-summary-title {
+  margin: 0 0 6px 0;
+  font-size: 0.85rem;
+}
+
+.status-summary-body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.status-summary-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.status-summary-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.status-summary-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.status-summary-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.status-summary-chart {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  padding-top: 4px;
+}
+
+.status-chart-canvas {
+  max-width: 210px;
+  max-height: 210px;
+}
+
 .chart-container {
   background: var(--surface);
   border: 1px solid var(--border);

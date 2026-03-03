@@ -102,22 +102,44 @@ $inactiveRescuers = $totalRescuers - $activeRescuers;
                 <h1>User Status Monitoring</h1>
                 <p class="muted">Active = any involvement within the last 7 days. Login history not tracked.</p>
 
-                <div class="metric-grid" style="margin-top:24px;">
-                    <div class="metric-card">
-                        <div class="metric-header"><h4>Active Responders</h4></div>
-                        <div class="metric-value"><?php echo $activeResponders; ?></div>
+                <!-- Summary metrics + charts -->
+                <div class="status-summary-grid">
+                    <div class="status-summary-card">
+                        <h3 class="status-summary-title">Responders</h3>
+                        <div class="status-summary-body">
+                            <div class="status-summary-metrics">
+                                <div class="status-summary-line">
+                                    <span class="status-summary-label">Active Responders</span>
+                                    <span class="status-summary-value"><?php echo $activeResponders; ?></span>
+                                </div>
+                                <div class="status-summary-line">
+                                    <span class="status-summary-label">Inactive Responders</span>
+                                    <span class="status-summary-value"><?php echo $inactiveResponders; ?></span>
+                                </div>
+                            </div>
+                            <div class="status-summary-chart">
+                                <canvas id="respondersChart" class="status-chart-canvas"></canvas>
+                            </div>
+                        </div>
                     </div>
-                    <div class="metric-card">
-                        <div class="metric-header"><h4>Inactive Responders</h4></div>
-                        <div class="metric-value"><?php echo $inactiveResponders; ?></div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-header"><h4>Active Rescuers</h4></div>
-                        <div class="metric-value"><?php echo $activeRescuers; ?></div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-header"><h4>Inactive Rescuers</h4></div>
-                        <div class="metric-value"><?php echo $inactiveRescuers; ?></div>
+
+                    <div class="status-summary-card">
+                        <h3 class="status-summary-title">Rescuers</h3>
+                        <div class="status-summary-body">
+                            <div class="status-summary-metrics">
+                                <div class="status-summary-line">
+                                    <span class="status-summary-label">Active Rescuers</span>
+                                    <span class="status-summary-value"><?php echo $activeRescuers; ?></span>
+                                </div>
+                                <div class="status-summary-line">
+                                    <span class="status-summary-label">Inactive Rescuers</span>
+                                    <span class="status-summary-value"><?php echo $inactiveRescuers; ?></span>
+                                </div>
+                            </div>
+                            <div class="status-summary-chart">
+                                <canvas id="rescuersChart" class="status-chart-canvas"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -168,10 +190,74 @@ $inactiveRescuers = $totalRescuers - $activeRescuers;
     </div>
 
     <script src="../js/script.js"></script>
+    <!-- Chart.js (same as dashboard) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         if (!localStorage.getItem('vw_token')) {
             window.location.href = '../login.php';
         }
+
+        // Charts (match dashboard style)
+        document.addEventListener('DOMContentLoaded', function () {
+            const respondersCtx = document.getElementById('respondersChart');
+            const rescuersCtx = document.getElementById('rescuersChart');
+
+            if (respondersCtx) {
+                new Chart(respondersCtx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Active', 'Inactive'],
+                        datasets: [{
+                            data: [<?php echo $activeResponders; ?>, <?php echo $inactiveResponders; ?>],
+                            backgroundColor: ['#00e5ff', '#1f2933'],
+                            borderColor: '#050814',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#e2e8f0',
+                                    font: { family: "'Space Mono', monospace", size: 12 }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (rescuersCtx) {
+                new Chart(rescuersCtx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Active', 'Inactive'],
+                        datasets: [{
+                            data: [<?php echo $activeRescuers; ?>, <?php echo $inactiveRescuers; ?>],
+                            backgroundColor: ['#22c55e', '#1f2933'],
+                            borderColor: '#050814',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#e2e8f0',
+                                    font: { family: "'Space Mono', monospace", size: 12 }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>
