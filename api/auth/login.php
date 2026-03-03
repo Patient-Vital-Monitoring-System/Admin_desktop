@@ -37,6 +37,22 @@ try {
         }
     }
 
+    // Log successful login to login_audit
+    $pdo->exec("CREATE TABLE IF NOT EXISTS login_audit (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        email VARCHAR(255) NOT NULL,
+        role VARCHAR(50) NOT NULL,
+        action ENUM('login','logout') NOT NULL,
+        ip_address VARCHAR(45) DEFAULT NULL,
+        user_agent VARCHAR(255) DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+    $ip = $_SERVER['REMOTE_ADDR'] ?? null;
+    $ua = $_SERVER['HTTP_USER_AGENT'] ?? null;
+    $stmt = $pdo->prepare("INSERT INTO login_audit (email, role, action, ip_address, user_agent) VALUES (?, ?, 'login', ?, ?)");
+    $stmt->execute([$user['email'], $user['role'], $ip, $ua]);
+
     // return success with user info and mock token
     $token = bin2hex(random_bytes(16));
     echo json_encode(['success'=>true, 'data'=>['user'=>['id'=>$user['id'],'email'=>$user['email'],'role'=>$user['role']], 'token'=>$token]]);

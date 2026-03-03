@@ -25,8 +25,34 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Logout functionality
-        function performLogout() {
-            
+        async function performLogout() {
+            // Read user info before clearing storage
+            let email = '';
+            let role = '';
+            try {
+                const stored = localStorage.getItem('vw_user');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    email = parsed.email || '';
+                    role = parsed.role || '';
+                }
+            } catch (e) {
+                // ignore parse errors
+            }
+
+            // Fire-and-forget logout audit (do not block UI if it fails)
+            if (email) {
+                try {
+                    await fetch('../api/auth/logout_audit.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email, role: role })
+                    });
+                } catch (e) {
+                    // ignore network errors
+                }
+            }
+
             // Clear session storage
             sessionStorage.clear();
             

@@ -3,8 +3,21 @@ require_once __DIR__ . '/../../api/auth/config.php';
 
 $audit_logs = [];
 $audit_summary = [];
+$login_logs = [];
+$login_stats = [];
 
 try {
+    // Ensure login_audit table exists for login/logout history
+    $pdo->exec("CREATE TABLE IF NOT EXISTS login_audit (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        email VARCHAR(255) NOT NULL,
+        role VARCHAR(50) NOT NULL,
+        action ENUM('login','logout') NOT NULL,
+        ip_address VARCHAR(45) DEFAULT NULL,
+        user_agent VARCHAR(255) DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
     // COMPREHENSIVE AUDIT LOG - All important system actions
     $stmt = $pdo->query("SELECT 
                             dl.log_id,
@@ -85,6 +98,28 @@ try {
     $audit_summary['verification_rate'] = $audit_summary['devices_returned'] > 0 
         ? round(($audit_summary['verifications_completed'] / $audit_summary['devices_returned']) * 100, 1)
         : 0;
+
+    // LOGIN / LOGOUT STATS (last 7 days)
+    $stmt = $pdo->query("
+        SELECT 
+            DATE(created_at) AS day,
+            SUM(action = 'login') AS logins,
+            SUM(action = 'logout') AS logouts
+        FROM login_audit
+        WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        GROUP BY DATE(created_at)
+        ORDER BY day ASC
+    ");
+    $login_stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Latest login/logout events
+    $stmt = $pdo->query("
+        SELECT email, role, action, ip_address, created_at
+        FROM login_audit
+        ORDER BY created_at DESC
+        LIMIT 50
+    ");
+    $login_logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
 } catch (Exception $e) {
     error_log('Audit log query failed: ' . $e->getMessage());
@@ -192,6 +227,52 @@ try {
                     <div class="audit-icon">📊</div>
                     <div class="audit-value"><?php echo $audit_summary['return_rate']; ?>%</div>
                     <div class="audit-label">Return Rate</div>
+                </div>
+            </div>
+
+            <!-- LOGIN / LOGOUT ACTIVITY OVERVIEW -->
+            <div class="audit-section">
+                <h2>👤 User Session Activity</h2>
+                <p style="margin-bottom: 20px; color: var(--muted);">
+                    Login and logout history across all admin and field accounts (last 7 days).
+                </p>
+
+                <div class="charts-section" style="margin: 0 0 32px 0;">
+                    <div class="chart-container">
+                        <h3>Logins vs Logouts (Last 7 Days)</h3>
+                        <canvas id="loginActivityChart" style="max-height: 260px;"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Action</th>
+                                    <th>IP Address</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($login_logs as $log): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($log['email']); ?></td>
+                                    <td style="text-transform: capitalize;"><?php echo htmlspecialchars($log['role']); ?></td>
+                                    <td>
+                                        <span class="return-badge <?php echo $log['action'] === 'login' ? 'yes' : 'no'; ?>">
+                                            <?php echo strtoupper($log['action']); ?>
+                                        </span>
+                                    </td>
+                                    <td><?php echo $log['ip_address'] ? htmlspecialchars($log['ip_address']) : '<span style="color: var(--muted);">N/A</span>'; ?></td>
+                                    <td><?php echo htmlspecialchars(date('M d, Y g:i A', strtotime($log['created_at']))); ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -350,10 +431,66 @@ try {
     </div>
 
     <script src="../js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         if (!localStorage.getItem('vw_token')) {
             window.location.href = '../login.php';
         }
+
+        // Login / Logout Activity Chart
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('loginActivityChart');
+            if (!ctx) return;
+
+            const stats = <?php echo json_encode($login_stats); ?>;
+            const labels = stats.map(s => s.day);
+            const logins = stats.map(s => Number(s.logins));
+            const logouts = stats.map(s => Number(s.logouts));
+
+            new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Logins',
+                            data: logins,
+                            backgroundColor: '#00e5ff',
+                            borderColor: '#00c9e8',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Logouts',
+                            data: logouts,
+                            backgroundColor: '#ff4d6d',
+                            borderColor: '#ff3358',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#a0aec0' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#a0aec0' },
+                            grid: { color: 'rgba(160, 174, 192, 0.1)' },
+                            beginAtZero: true,
+                            precision: 0
+                        },
+                        x: {
+                            ticks: { color: '#a0aec0' },
+                            grid: { color: 'rgba(160, 174, 192, 0.05)' }
+                        }
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>
