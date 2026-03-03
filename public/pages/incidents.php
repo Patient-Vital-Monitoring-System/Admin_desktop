@@ -16,16 +16,16 @@ try {
     $incident_data['completed'] = $stmt->fetch(PDO::FETCH_ASSOC)['cnt'] ?? 0;
     
     // Average incident duration (in hours)
-    $stmt = $pdo->query("SELECT AVG(TIMESTAMPDIFF(HOUR, created_at, IFNULL(updated_at, NOW()))) as avg_duration FROM incident");
+    $stmt = $pdo->query("SELECT AVG(TIMESTAMPDIFF(HOUR, start_time, IFNULL(end_time, NOW()))) as avg_duration FROM incident");
     $incident_data['avg_duration'] = $stmt->fetch(PDO::FETCH_ASSOC)['avg_duration'] ?? 0;
     $incident_data['avg_duration'] = round($incident_data['avg_duration'], 1);
     
     // Detailed incident list
-    $stmt = $pdo->query("SELECT i.incident_id, p.pat_name, i.status, i.created_at, i.updated_at, 
-                                TIMESTAMPDIFF(HOUR, i.created_at, IFNULL(i.updated_at, NOW())) as duration_hours
+    $stmt = $pdo->query("SELECT i.incident_id, p.pat_name, i.status, i.start_time as created_at, i.end_time as updated_at, 
+                                TIMESTAMPDIFF(HOUR, i.start_time, IFNULL(i.end_time, NOW())) as duration_hours
                         FROM incident i 
                         JOIN patient p ON i.pat_id = p.pat_id 
-                        ORDER BY i.created_at DESC");
+                        ORDER BY i.start_time DESC");
     $incidents = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
 } catch (Exception $e) {
@@ -60,6 +60,7 @@ try {
                 <a class="nav-link" href="device_incidents.php">Device Tracking</a>
                 <a class="nav-link" href="audit_log.php">Activity Log</a>
                 <a class="nav-link" href="alerts.php">Alert Records</a>
+                <a class="nav-link" href="user_status.php">User Status</a>
                 <a class="nav-link" href="profile.php">Profile</a>
                 <a class="nav-link" href="logout.php">Logout</a>
             </nav>

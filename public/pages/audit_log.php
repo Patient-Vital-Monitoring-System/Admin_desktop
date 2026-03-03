@@ -11,16 +11,16 @@ try {
                             d.dev_serial,
                             r.resp_name as assigned_to,
                             m.mgmt_name as assigned_by,
-                            dl.created_at as assignment_date,
-                            CASE WHEN dl.returned_at IS NOT NULL THEN 'Yes' ELSE 'No' END as device_returned,
-                            dl.returned_at,
-                            dl.verification_date,
+                            dl.date_assigned as assignment_date,
+                            CASE WHEN dl.date_returned IS NOT NULL THEN 'Yes' ELSE 'No' END as device_returned,
+                            dl.date_returned as returned_at,
+                            dl.verified_return as verification_status,
                             'Device Assignment' as action_type
                         FROM device_log dl
                         JOIN device d ON dl.dev_id = d.dev_id
                         LEFT JOIN responder r ON dl.resp_id = r.resp_id
                         LEFT JOIN management m ON dl.mgmt_id = m.mgmt_id
-                        ORDER BY dl.created_at DESC
+                        ORDER BY dl.date_assigned DESC
                         LIMIT 100");
     $device_logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -30,15 +30,15 @@ try {
                             p.pat_name,
                             r.resp_name as transferred_by_responder,
                             resc.resc_name as transferred_to_rescuer,
-                            i.created_at as incident_created,
-                            i.updated_at as transfer_date,
+                            i.start_time as incident_created,
+                            i.end_time as transfer_date,
                             'Incident Transfer' as action_type
                         FROM incident i
                         JOIN patient p ON i.pat_id = p.pat_id
                         LEFT JOIN responder r ON i.resp_id = r.resp_id
                         LEFT JOIN rescuer resc ON i.resc_id = resc.resc_id
                         WHERE i.status = 'transferred'
-                        ORDER BY i.updated_at DESC
+                        ORDER BY i.end_time DESC
                         LIMIT 100");
     $transfer_logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -47,16 +47,16 @@ try {
                             i.incident_id,
                             p.pat_name,
                             CASE WHEN i.resp_id IS NOT NULL THEN r.resp_name ELSE resc.resc_name END as completed_by,
-                            i.created_at as incident_created,
-                            i.updated_at as completion_date,
-                            TIMESTAMPDIFF(HOUR, i.created_at, i.updated_at) as duration_hours,
+                            i.start_time as incident_created,
+                            i.end_time as completion_date,
+                            TIMESTAMPDIFF(HOUR, i.start_time, i.end_time) as duration_hours,
                             'Incident Completion' as action_type
                         FROM incident i
                         JOIN patient p ON i.pat_id = p.pat_id
                         LEFT JOIN responder r ON i.resp_id = r.resp_id
                         LEFT JOIN rescuer resc ON i.resc_id = resc.resc_id
                         WHERE i.status IN ('completed', 'resolved')
-                        ORDER BY i.updated_at DESC
+                        ORDER BY i.end_time DESC
                         LIMIT 100");
     $completion_logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -64,10 +64,10 @@ try {
     $stmt = $pdo->query("SELECT COUNT(*) as total_assignments FROM device_log");
     $audit_summary['total_assignments'] = $stmt->fetch(PDO::FETCH_ASSOC)['total_assignments'] ?? 0;
     
-    $stmt = $pdo->query("SELECT COUNT(*) as devices_returned FROM device_log WHERE returned_at IS NOT NULL");
+    $stmt = $pdo->query("SELECT COUNT(*) as devices_returned FROM device_log WHERE date_returned IS NOT NULL");
     $audit_summary['devices_returned'] = $stmt->fetch(PDO::FETCH_ASSOC)['devices_returned'] ?? 0;
     
-    $stmt = $pdo->query("SELECT COUNT(*) as verifications_completed FROM device_log WHERE verification_date IS NOT NULL");
+    $stmt = $pdo->query("SELECT COUNT(*) as verifications_completed FROM device_log WHERE verified_return = 1");
     $audit_summary['verifications_completed'] = $stmt->fetch(PDO::FETCH_ASSOC)['verifications_completed'] ?? 0;
     
     $stmt = $pdo->query("SELECT COUNT(*) as transfers_completed FROM incident WHERE status = 'transferred'");
@@ -117,8 +117,7 @@ try {
                 <a class="nav-link" href="incidents.php">Incident Monitoring</a>
                 <a class="nav-link" href="device_incidents.php">Device Tracking</a>
                 <a class="nav-link active" href="audit_log.php">Activity Log</a>
-                <a class="nav-link" href="alerts.php">Alert Records</a>
-                <a class="nav-link" href="profile.php">Profile</a>
+                <a class="nav-link" href="alerts.php">Alert Records</a>                <a class="nav-link" href="user_status.php">User Status</a>                <a class="nav-link" href="profile.php">Profile</a>
                 <a class="nav-link" href="logout.php">Logout</a>
             </nav>
         </aside>
@@ -184,7 +183,7 @@ try {
                                     <th>Assignment Date</th>
                                     <th>Returned</th>
                                     <th>Return Date</th>
-                                    <th>Verification Date</th>
+                                    <th>Verified Return</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -201,7 +200,7 @@ try {
                                         </span>
                                     </td>
                                     <td><?php echo $log['returned_at'] ? htmlspecialchars(date('M d, Y H:i', strtotime($log['returned_at']))) : '<span style="color: var(--muted);">—</span>'; ?></td>
-                                    <td><?php echo $log['verification_date'] ? htmlspecialchars(date('M d, Y H:i', strtotime($log['verification_date']))) : '<span style="color: var(--muted);">Pending</span>'; ?></td>
+                                    <td><?php echo $log['verification_status'] ? '<span class="return-badge yes">Yes</span>' : '<span class="return-badge no">No</span>'; ?></td>
                                 </tr>
                                 <?php endforeach; ?>
                             </tbody>

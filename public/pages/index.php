@@ -27,6 +27,7 @@
                 <a class="nav-link" href="device_incidents.php">Device Tracking</a>
                 <a class="nav-link" href="audit_log.php">Activity Log</a>
                 <a class="nav-link" href="alerts.php">Alert Records</a>
+                <a class="nav-link" href="user_status.php">User Status</a>
                 <a class="nav-link" href="profile.php">Profile</a>
                 <a class="nav-link" href="logout.php">Logout</a>
             </nav>
@@ -70,16 +71,16 @@
                 $device_status = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 
                 // RECENT ACTIVITY (last 5 incidents)
-                $stmt = $pdo->query("SELECT i.incident_id, p.pat_name, i.status, i.created_at FROM incident i 
+                $stmt = $pdo->query("SELECT i.incident_id, p.pat_name, i.status, i.start_time as created_at FROM incident i 
                                      JOIN patient p ON i.pat_id = p.pat_id 
-                                     ORDER BY i.created_at DESC LIMIT 5");
+                                     ORDER BY i.start_time DESC LIMIT 5");
                 $recent_activity = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 
                 // RECENTLY COMPLETED INCIDENTS (last 5)
-                $stmt = $pdo->query("SELECT i.incident_id, p.pat_name, i.updated_at FROM incident i 
+                $stmt = $pdo->query("SELECT i.incident_id, p.pat_name, i.end_time as updated_at FROM incident i 
                                      JOIN patient p ON i.pat_id = p.pat_id 
                                      WHERE i.status IN ('completed', 'resolved') 
-                                     ORDER BY i.updated_at DESC LIMIT 5");
+                                     ORDER BY i.end_time DESC LIMIT 5");
                 $completed_incidents = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 
                 // DEVICES PENDING VERIFICATION (maintenance status)

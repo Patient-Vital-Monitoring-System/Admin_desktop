@@ -29,12 +29,12 @@ $highBpCount = $highBpData['high_bp_count'];
 // Get peak hour of incidents
 $peakHourQuery = $pdo->prepare("
     SELECT 
-        HOUR(created_at) as hour,
+        HOUR(start_time) as hour,
         COUNT(*) as incident_count
     FROM incident
-    WHERE MONTH(created_at) = MONTH(CURDATE())
-    AND YEAR(created_at) = YEAR(CURDATE())
-    GROUP BY HOUR(created_at)
+    WHERE MONTH(start_time) = MONTH(CURDATE())
+    AND YEAR(start_time) = YEAR(CURDATE())
+    GROUP BY HOUR(start_time)
     ORDER BY incident_count DESC
     LIMIT 1
 ");
@@ -73,12 +73,12 @@ $bpTrends = array_reverse($bpTrendQuery->fetchAll(PDO::FETCH_ASSOC));
 // Get incident distribution by hour
 $incidentHourlyQuery = $pdo->prepare("
     SELECT 
-        HOUR(created_at) as hour,
+        HOUR(start_time) as hour,
         COUNT(*) as incident_count
     FROM incident
-    WHERE YEAR(created_at) = YEAR(CURDATE())
-    AND MONTH(created_at) = MONTH(CURDATE())
-    GROUP BY HOUR(created_at)
+    WHERE YEAR(start_time) = YEAR(CURDATE())
+    AND MONTH(start_time) = MONTH(CURDATE())
+    GROUP BY HOUR(start_time)
     ORDER BY hour ASC
 ");
 $incidentHourlyQuery->execute();
@@ -151,6 +151,7 @@ $vitalTableData = $vitalTableQuery->fetchAll(PDO::FETCH_ASSOC);
                 <a class="nav-link" href="device_incidents.php">Device Tracking</a>
                 <a class="nav-link" href="audit_log.php">Activity Log</a>
                 <a class="nav-link" href="alerts.php">Alert Records</a>
+                <a class="nav-link" href="user_status.php">User Status</a>
                 <a class="nav-link" href="profile.php">Profile</a>
                 <a class="nav-link" href="logout.php">Logout</a>
             </nav>
