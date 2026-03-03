@@ -61,8 +61,8 @@
 
         <main class="main-content">
             <div style="padding: 32px 20px; max-width: 1200px; margin: 0 auto; width: 100%;">
-                <h1>Responders & Rescuers</h1>
-                <p>View and manage all field staff (Responders and Rescuers) below.</p>
+                <h1>Staff Directory</h1>
+                <p>View and manage all field staff (Management, Responders, and Rescuers) below.</p>
 
                 <?php
                 require_once __DIR__ . '/../../api/auth/config.php';
@@ -72,7 +72,8 @@
                 try {
                     $responders = [];
                     $rescuers = [];
-                    
+                    $management = [];
+
                     // Get responders
                     $query = "SELECT resp_id as id, resp_name as name, resp_email as email, resp_contact as contact, 'responder' as role FROM responder";
                     if ($search) {
@@ -85,7 +86,7 @@
                         $stmt->execute();
                     }
                     $responders = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                    
+
                     // Get rescuers
                     $query = "SELECT resc_id as id, resc_name as name, resc_email as email, resc_contact as contact, 'rescuer' as role FROM rescuer";
                     if ($search) {
@@ -98,8 +99,21 @@
                         $stmt->execute();
                     }
                     $rescuers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                    
-                    $staff = array_merge($responders, $rescuers);
+
+                    // Get management/staff (from management table)
+                    $query = "SELECT mgmt_id as id, mgmt_name as name, mgmt_email as email, '' as contact, 'staff' as role FROM management";
+                    if ($search) {
+                        $query .= " WHERE mgmt_name LIKE :search OR mgmt_email LIKE :search";
+                    }
+                    $stmt = $pdo->prepare($query);
+                    if ($search) {
+                        $stmt->execute(['search' => "%$search%"]);
+                    } else {
+                        $stmt->execute();
+                    }
+                    $management = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                    $staff = array_merge($responders, $rescuers, $management);
                 } catch (Exception $e) {
                     error_log('Staff query failed: ' . $e->getMessage());
                 }
@@ -274,6 +288,7 @@
                         <label for="staffRole">Role *</label>
                         <select id="staffRole" name="role" required>
                             <option value="">Select role...</option>
+                            <option value="staff">Management / Staff</option>
                             <option value="responder">Responder</option>
                             <option value="rescuer">Rescuer</option>
                         </select>
@@ -710,6 +725,12 @@
             font-family: 'Space Mono', monospace;
             text-transform: uppercase;
             border: 1px solid;
+        }
+
+        .role-badge.staff {
+            background: rgba(0, 229, 255, 0.15);
+            color: var(--accent);
+            border-color: rgba(0, 229, 255, 0.3);
         }
 
         .role-badge.responder {
