@@ -6,7 +6,7 @@
     <title>Logout - Patient Vital Monitoring Admin</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
     <nav class="navbar-top">
@@ -51,7 +51,7 @@
 
             // Redirect to login page after 2 seconds
             setTimeout(() => {
-                window.location.href = 'login.php';
+                window.location.href = '../login.php';
             }, 2000);
         }
 

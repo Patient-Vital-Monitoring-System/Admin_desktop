@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/api/auth/config.php';
+require_once __DIR__ . '/../../api/auth/config.php';
 $rows = [];
 try {
     $stmt = $pdo->query("SELECT v.*, i.incident_id, p.pat_name FROM vitalstat v
@@ -19,7 +19,7 @@ try {
     <title>Patient Vital Monitoring Admin</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
 
@@ -75,10 +75,10 @@ try {
     <?php endif; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="script.js"></script>
+    <script src="../js/script.js"></script>
     <script>
         if (!localStorage.getItem('vw_token')) {
-            window.location.href = 'login.php';
+            window.location.href = '../login.php';
         }
     </script>
 </body>

@@ -113,7 +113,7 @@ async function doLogin() {
   const password = document.getElementById('login-pass').value;
 
   try {
-    const res = await fetch('api/auth/login.php', {
+    const res = await fetch('../api/auth/login.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, role: currentRole })
@@ -138,12 +138,11 @@ async function doLogin() {
     // store session info then navigate to dashboard
     localStorage.setItem('vw_token', json.data.token);
     localStorage.setItem('vw_user', JSON.stringify(json.data.user));
-    // redirect to index.php in same folder (avoid path issues)
-    const base = window.location.pathname.replace(/login\.php$/, '');
-    window.location.href = base + 'index.php';
+    // redirect to pages/index.php
+    window.location.href = 'pages/index.php';
   } catch (err) {
     console.error('fetch error', err);
-    alert('Unable to reach server. Make sure you are running via http://localhost/Admin_desktop/login.php');
+    alert('Unable to reach server. Make sure you are running via http://localhost/Admin_desktop/public/login.php');
   }
 }
 </script>

@@ -6,7 +6,7 @@
     <title>Patient Vital Monitoring Admin</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
 
@@ -34,14 +34,15 @@
         </div>
     </div>
 
-   <h1>Alert Records Page</h1>
-    <p>This is a placeholder for the Alert Records page where you can view and manage patient alerts.</p>
-    
+    <h1>Welcome to the Patient Vital Monitoring Admin Interface</h1>
+    <p>This is a placeholder for the admin dashboard where you can monitor patient vitals.</p>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="script.js"></script>
+    <script src="../js/script.js"></script>
+    <!-- redirect to login page when not logged in -->
     <script>
         if (!localStorage.getItem('vw_token')) {
-            window.location.href = 'login.php';
+            window.location.href = '../login.php';
         }
     </script>
 </body>
