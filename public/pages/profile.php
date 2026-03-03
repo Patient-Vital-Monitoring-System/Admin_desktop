@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Vital Monitoring Admin</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/vitalwear.css">
 </head>
 <body>
 
@@ -37,7 +35,6 @@
    <h1>Profile Page</h1>
     <p>This is a placeholder for the Profile page where you can view and update user profile information.</p>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/script.js"></script>
     <script>
         if (!localStorage.getItem('vw_token')) {

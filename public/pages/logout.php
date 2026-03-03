@@ -4,22 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Logout - Patient Vital Monitoring Admin</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/vitalwear.css">
 </head>
 <body>
     <nav class="navbar-top">
         <h2 class="navbar-brand">Patient Vitals Rescue</h2>
     </nav>
 
-    <div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
-        <div class="text-center">
+    <div style="min-height: 80vh; display: flex; align-items: center; justify-content: center;">
+        <div style="text-align: center;">
             <h1 id="logout-message">Logging out...</h1>
             <p id="logout-status">Please wait while we log you out securely.</p>
-            <div class="spinner-border mt-3" id="logout-spinner" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
+            <div style="margin-top: 24px; border: 3px solid rgba(0, 229, 255, 0.2); border-top: 3px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 24px auto 0;"></div>
+            <style>
+                @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            </style>
         </div>
     </div>
 
@@ -43,11 +42,9 @@
             // Update UI with success message
             const message = document.getElementById('logout-message');
             const status = document.getElementById('logout-status');
-            const spinner = document.getElementById('logout-spinner');
 
             message.textContent = 'You have been logged out successfully!';
             status.textContent = 'Redirecting to login page...';
-            spinner.style.display = 'none';
 
             // Redirect to login page after 2 seconds
             setTimeout(() => {
