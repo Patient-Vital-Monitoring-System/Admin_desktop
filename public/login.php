@@ -27,7 +27,7 @@
       <label>PASSWORD</label>
       <input type="password" id="login-pass" placeholder="Enter password" value="••••••••">
     </div>
-    <button class="btn-primary" onclick="doLogin()">ACCESS SYSTEM</button>
+    <button class="btn-login" onclick="doLogin()">ACCESS SYSTEM</button>
   </div>
 </div>
 

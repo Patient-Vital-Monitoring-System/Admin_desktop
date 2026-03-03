@@ -11,8 +11,8 @@
         <h2 class="navbar-brand">Patient Vitals Rescue</h2>
     </nav>
 
-    <div style="min-height: 80vh; display: flex; align-items: center; justify-content: center;">
-        <div style="text-align: center;">
+    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 32px 20px;">
+        <div style="text-align: center; max-width: 500px;">
             <h1 id="logout-message">Logging out...</h1>
             <p id="logout-status">Please wait while we log you out securely.</p>
             <div style="margin-top: 24px; border: 3px solid rgba(0, 229, 255, 0.2); border-top: 3px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 24px auto 0;"></div>
@@ -30,7 +30,9 @@
             // Clear session storage
             sessionStorage.clear();
             
-            // Clear local storage (if storing user session data)
+            // Clear local storage (including auth token)
+            localStorage.removeItem('vw_token');
+            localStorage.removeItem('vw_user');
             localStorage.removeItem('userSession');
             localStorage.removeItem('authToken');
             
