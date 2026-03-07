@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VitalWear Admin - Redirecting...</title>
+    <meta http-equiv="refresh" content="0;url=login.html">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e1a 0%, #111827 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e2e8f0;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+        }
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #1f2d45;
+            border-top: 4px solid #00e5ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        p {
+            color: #64748b;
+            font-size: 14px;
+        }
+        a {
+            color: #00e5ff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="loader"></div>
+        <p>Redirecting to VitalWear Admin...</p>
+        <p style="margin-top: 10px;">If not redirected, <a href="login.html">click here</a></p>
+    </div>
+</body>
+</html>
+
