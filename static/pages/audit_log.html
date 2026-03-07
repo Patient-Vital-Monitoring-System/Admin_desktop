@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Activity Log - Admin</title>
+    <link rel="stylesheet" href="../css/vitalwear.css">
+</head>
+<body>
+
+    <nav class="navbar-top">
+        <h2 class="navbar-brand">System Activity Log</h2>
+    </nav>
+
+    <div class="page-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h5 class="sidebar-title">Menu</h5>
+            </div>
+            <nav class="sidebar-nav">
+                <a class="nav-link" href="index.html">Dashboard</a>
+
+                <!-- User Management -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">User Management <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="patients.html">Staff Directory</a>
+                        <a class="nav-link" href="user_status.html">User Status</a>
+                    </div>
+                </div>
+
+                <!-- Reports -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Reports <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="vitals_analytics.html">Vital Statistics</a>
+                        <a class="nav-link active" href="audit_log.html">System Activity Log</a>
+                    </div>
+                </div>
+
+                <!-- Monitoring -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Monitoring <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="incidents.html">Incident Monitoring</a>
+                        <a class="nav-link" href="device_incidents.html">Device Overview</a>
+                        <a class="nav-link" href="vitals.html">User Activity</a>
+                    </div>
+                </div>
+
+                <!-- Accounts -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Accounts <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="profile.html">Profile</a>
+                        <a class="nav-link" href="logout.html" style="color: #ff4d6d;">Logout</a>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div style="padding: 32px 20px; max-width: 1400px; margin: 0 auto; width: 100%;">
+                <h1>📋 System Activity Log</h1>
+                <p>Track all system activities, user actions, and security events.</p>
+
+                <!-- Audit Summary -->
+                <div class="audit-summary">
+                    <div class="audit-metric">
+                        <div class="audit-icon">📝</div>
+                        <div class="audit-value" id="totalLogs">156</div>
+                        <div class="audit-label">Total Events</div>
+                    </div>
+                    <div class="audit-metric">
+                        <div class="audit-icon">👤</div>
+                        <div class="audit-value" id="uniqueUsers">24</div>
+                        <div class="audit-label">Active Users</div>
+                    </div>
+                    <div class="audit-metric">
+                        <div class="audit-icon">🔐</div>
+                        <div class="audit-value" id="logins">48</div>
+                        <div class="audit-label">Logins Today</div>
+                    </div>
+                    <div class="audit-metric">
+                        <div class="audit-icon">⚠️</div>
+                        <div class="audit-value" id="alerts">3</div>
+                        <div class="audit-label">Alerts</div>
+                    </div>
+                </div>
+
+                <!-- Audit Log Table -->
+                <div class="audit-section">
+                    <h2>Recent Activities</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Log ID</th>
+                                        <th>Timestamp</th>
+                                        <th>User</th>
+                                        <th>Action</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="auditTable">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        // Check authentication
+        if (!localStorage.getItem('vw_token')) {
+            window.location.href = '../login.html';
+        }
+
+        // Mock audit log data
+        const auditData = [
+            { log_id: 'LOG-001', timestamp: 'Feb 01, 2026 14:30:45', user: 'admin@vitalwear.com', action: 'Login', details: 'Successful login' },
+            { log_id: 'LOG-002', timestamp: 'Feb 01, 2026 14:25:12', user: 'john@responder.com', action: 'Incident Update', details: 'Updated INC-001 status' },
+            { log_id: 'LOG-003', timestamp: 'Feb 01, 2026 14:20:33', user: 'jane@rescuer.com', action: 'Patient Data', details: 'Viewed patient records' },
+            { log_id: 'LOG-004', timestamp: 'Feb 01, 2026 14:15:08', user: 'admin@vitalwear.com', action: 'User Management', details: 'Created new staff account' },
+            { log_id: 'LOG-005', timestamp: 'Feb 01, 2026 14:10:22', user: 'sarah@responder.com', action: 'Device Assign', details: 'Assigned DEV-005 to patient' },
+            { log_id: 'LOG-006', timestamp: 'Feb 01, 2026 14:05:55', user: 'david@rescuer.com', action: 'Incident Create', details: 'Created new incident INC-005' },
+            { log_id: 'LOG-007', timestamp: 'Feb 01, 2026 14:00:17', user: 'admin@vitalwear.com', action: 'System Config', details: 'Updated system settings' },
+            { log_id: 'LOG-008', timestamp: 'Feb 01, 2026 13:55:42', user: 'mike@staff.com', action: 'Report Export', details: 'Exported daily report' },
+            { log_id: 'LOG-009', timestamp: 'Feb 01, 2026 13:50:11', user: 'emily@rescuer.com', action: 'Incident Update', details: 'Completed INC-003' },
+            { log_id: 'LOG-010', timestamp: 'Feb 01, 2026 13:45:28', user: 'john@responder.com', action: 'Login', details: 'Successful login' }
+        ];
+
+        // Render table
+        const tbody = document.getElementById('auditTable');
+        tbody.innerHTML = auditData.map(log => `
+            <tr>
+                <td><span class="log-id-badge">${log.log_id}</span></td>
+                <td>${log.timestamp}</td>
+                <td>${log.user}</td>
+                <td>${log.action}</td>
+                <td style="color: var(--muted);">${log.details}</td>
+            </tr>
+        `).join('');
+    </script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incident Monitoring - Patient Vital Monitoring Admin</title>
+    <link rel="stylesheet" href="../css/vitalwear.css">
+</head>
+<body>
+
+    <nav class="navbar-top">
+        <h2 class="navbar-brand">Incident Monitoring</h2>
+    </nav>
+
+    <div class="page-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h5 class="sidebar-title">Menu</h5>
+            </div>
+            <nav class="sidebar-nav">
+                <a class="nav-link" href="index.html">Dashboard</a>
+
+                <!-- User Management -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">User Management <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="patients.html">Staff Directory</a>
+                        <a class="nav-link" href="user_status.html">User Status</a>
+                    </div>
+                </div>
+
+                <!-- Reports -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Reports <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="vitals_analytics.html">Vital Statistics</a>
+                        <a class="nav-link" href="audit_log.html">System Activity Log</a>
+                    </div>
+                </div>
+
+                <!-- Monitoring -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Monitoring <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link active" href="incidents.html">Incident Monitoring</a>
+                        <a class="nav-link" href="device_incidents.html">Device Overview</a>
+                        <a class="nav-link" href="vitals.html">User Activity</a>
+                    </div>
+                </div>
+
+                <!-- Accounts -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Accounts <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="profile.html">Profile</a>
+                        <a class="nav-link" href="logout.html" style="color: #ff4d6d;">Logout</a>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div style="padding: 32px 20px; max-width: 1400px; margin: 0 auto; width: 100%;">
+            <h1>🚨 Incident Monitoring</h1>
+            <p>Real-time monitoring and management of all incidents in the system.</p>
+
+            <!-- INCIDENT SUMMARY CARDS -->
+            <div class="incident-summary">
+                <div class="summary-card">
+                    <div class="summary-icon">📍</div>
+                    <div class="summary-value" id="ongoingCount">0</div>
+                    <div class="summary-label">Ongoing Incidents</div>
+                    <div class="summary-subtext">Active & Pending</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-icon">🔄</div>
+                    <div class="summary-value" id="transferredCount">0</div>
+                    <div class="summary-label">Transferred Incidents</div>
+                    <div class="summary-subtext">To Medical Facilities</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-icon">✅</div>
+                    <div class="summary-value" id="completedCount">0</div>
+                    <div class="summary-label">Completed Incidents</div>
+                    <div class="summary-subtext">Resolved & Closed</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-icon">⏱️</div>
+                    <div class="summary-value" id="avgDuration">0 hrs</div>
+                    <div class="summary-label">Average Duration</div>
+                    <div class="summary-subtext">Per Incident</div>
+                </div>
+            </div>
+
+            <!-- DETAILED INCIDENTS TABLE -->
+            <div class="incidents-table-section">
+                <h2>📋 All Incidents</h2>
+                <p style="margin-bottom: 20px; color: var(--muted);">Complete history of all incidents with duration and status tracking.</p>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Incident ID</th>
+                                    <th>Patient Name</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Completed</th>
+                                    <th>Duration (hrs)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="incidentsTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STATISTICS SECTION -->
+            <div class="statistics-section">
+                <h2>📊 Incident Statistics</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-title">Total Incidents</div>
+                        <div class="stat-number" id="totalIncidents">0</div>
+                    </div>
+
+                    <div class="stat-box">
+                        <div class="stat-title">Completion Rate</div>
+                        <div class="stat-number" id="completionRate">0%</div>
+                    </div>
+
+                    <div class="stat-box">
+                        <div class="stat-title">Transfer Rate</div>
+                        <div class="stat-number" id="transferRate">0%</div>
+                    </div>
+
+                    <div class="stat-box">
+                        <div class="stat-title">Active Rate</div>
+                        <div class="stat-number" id="activeRate">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        // Check authentication
+        if (!localStorage.getItem('vw_token')) {
+            window.location.href = '../login.html';
+        }
+
+        // Mock Incident Data
+        const incidentsData = [
+            { incident_id: 'INC-001', pat_name: 'Maria Santos', status: 'active', created_at: 'Feb 01, 2026 14:30', updated_at: null, duration_hours: 2.5 },
+            { incident_id: 'INC-002', pat_name: 'John Doe', status: 'pending', created_at: 'Feb 01, 2026 13:15', updated_at: null, duration_hours: 3.2 },
+            { incident_id: 'INC-003', pat_name: 'Jane Smith', status: 'active', created_at: 'Feb 01, 2026 12:00', updated_at: null, duration_hours: 4.1 },
+            { incident_id: 'INC-004', pat_name: 'Robert Brown', status: 'transferred', created_at: 'Jan 31, 2026 22:45', updated_at: 'Feb 01, 2026 08:30', duration_hours: 9.75 },
+            { incident_id: 'INC-005', pat_name: 'Lisa Wilson', status: 'completed', created_at: 'Jan 31, 2026 20:30', updated_at: 'Feb 01, 2026 06:15', duration_hours: 9.75 },
+            { incident_id: 'INC-006', pat_name: 'Michael Lee', status: 'resolved', created_at: 'Jan 30, 2026 18:20', updated_at: 'Jan 31, 2026 10:00', duration_hours: 15.67 },
+            { incident_id: 'INC-007', pat_name: 'Sarah Davis', status: 'completed', created_at: 'Jan 30, 2026 16:45', updated_at: 'Jan 30, 2026 22:30', duration_hours: 5.75 },
+            { incident_id: 'INC-008', pat_name: 'David Miller', status: 'transferred', created_at: 'Jan 29, 2026 14:30', updated_at: 'Jan 30, 2026 09:00', duration_hours: 18.5 },
+            { incident_id: 'INC-009', pat_name: 'Emily Johnson', status: 'completed', created_at: 'Jan 29, 2026 11:15', updated_at: 'Jan 29, 2026 18:45', duration_hours: 7.5 },
+            { incident_id: 'INC-010', pat_name: 'Chris Taylor', status: 'resolved', created_at: 'Jan 28, 2026 09:00', updated_at: 'Jan 29, 2026 14:30', duration_hours: 29.5 }
+        ];
+
+        // Calculate statistics
+        const ongoing = incidentsData.filter(i => i.status === 'active' || i.status === 'pending').length;
+        const transferred = incidentsData.filter(i => i.status === 'transferred').length;
+        const completed = incidentsData.filter(i => i.status === 'completed' || i.status === 'resolved').length;
+        const total = incidentsData.length;
+        const avgDuration = (incidentsData.reduce((sum, i) => sum + i.duration_hours, 0) / total).toFixed(1);
+
+        // Update summary cards
+        document.getElementById('ongoingCount').textContent = ongoing;
+        document.getElementById('transferredCount').textContent = transferred;
+        document.getElementById('completedCount').textContent = completed;
+        document.getElementById('avgDuration').textContent = avgDuration + ' hrs';
+
+        // Update statistics
+        document.getElementById('totalIncidents').textContent = total;
+        document.getElementById('completionRate').textContent = total > 0 ? ((completed / total) * 100).toFixed(1) + '%' : '0%';
+        document.getElementById('transferRate').textContent = total > 0 ? ((transferred / total) * 100).toFixed(1) + '%' : '0%';
+        document.getElementById('activeRate').textContent = total > 0 ? ((ongoing / total) * 100).toFixed(1) + '%' : '0%';
+
+        // Populate incidents table
+        const tbody = document.getElementById('incidentsTable');
+        tbody.innerHTML = incidentsData.map(incident => `
+            <tr>
+                <td>${incident.incident_id}</td>
+                <td>${incident.pat_name}</td>
+                <td><span class="status-badge ${incident.status}">${incident.status}</span></td>
+                <td>${incident.created_at}</td>
+                <td>${incident.updated_at || 'N/A'}</td>
+                <td>${incident.duration_hours}</td>
+            </tr>
+        `).join('');
+    </script>
+</body>
+</html>

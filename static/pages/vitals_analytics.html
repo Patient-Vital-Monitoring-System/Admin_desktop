@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vital Statistics - Admin</title>
+    <link rel="stylesheet" href="../css/vitalwear.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <nav class="navbar-top">
+        <h2 class="navbar-brand">Vital Statistics</h2>
+    </nav>
+
+    <div class="page-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h5 class="sidebar-title">Menu</h5>
+            </div>
+            <nav class="sidebar-nav">
+                <a class="nav-link" href="index.html">Dashboard</a>
+
+                <!-- User Management -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">User Management <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="patients.html">Staff Directory</a>
+                        <a class="nav-link" href="user_status.html">User Status</a>
+                    </div>
+                </div>
+
+                <!-- Reports -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Reports <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link active" href="vitals_analytics.html">Vital Statistics</a>
+                        <a class="nav-link" href="audit_log.html">System Activity Log</a>
+                    </div>
+                </div>
+
+                <!-- Monitoring -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Monitoring <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="incidents.html">Incident Monitoring</a>
+                        <a class="nav-link" href="device_incidents.html">Device Overview</a>
+                        <a class="nav-link" href="vitals.html">User Activity</a>
+                    </div>
+                </div>
+
+                <!-- Accounts -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Accounts <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="profile.html">Profile</a>
+                        <a class="nav-link" href="logout.html" style="color: #ff4d6d;">Logout</a>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div style="padding: 32px 20px; max-width: 1400px; margin: 0 auto; width: 100%;">
+                <h1>📊 Vital Statistics</h1>
+                <p>Analytics and insights from patient vital sign monitoring data.</p>
+
+                <!-- Charts Section -->
+                <div class="charts-section">
+                    <div class="chart-container">
+                        <h3>Heart Rate Distribution</h3>
+                        <canvas id="heartRateChart" style="max-width: 100%; height: 300px;"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Oxygen Saturation (SpO2)</h3>
+                        <canvas id="spo2Chart" style="max-width: 100%; height: 300px;"></canvas>
+                    </div>
+                </div>
+
+                <!-- Statistics Grid -->
+                <div class="statistics-section">
+                    <h2>📈 Key Metrics</h2>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-title">Avg Heart Rate</div>
+                            <div class="stat-number">78 bpm</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-title">Avg SpO2</div>
+                            <div class="stat-number">97%</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-title">Avg Temperature</div>
+                            <div class="stat-number">36.8°C</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-title">Total Readings</div>
+                            <div class="stat-number">1,247</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        // Check authentication
+        if (!localStorage.getItem('vw_token')) {
+            window.location.href = '../login.html';
+        }
+
+        // Heart Rate Chart
+        const heartCtx = document.getElementById('heartRateChart').getContext('2d');
+        new Chart(heartCtx, {
+            type: 'bar',
+            data: {
+                labels: ['< 60', '60-70', '70-80', '80-90', '90-100', '> 100'],
+                datasets: [{
+                    label: 'Patients',
+                    data: [12, 35, 48, 52, 28, 15],
+                    backgroundColor: [
+                        '#ff4d6d', '#f59e0b', '#00e5ff', '#39ff14', '#f59e0b', '#ff4d6d'
+                    ],
+                    borderColor: '#111827',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#64748b' },
+                        grid: { color: '#1f2d45' }
+                    },
+                    x: {
+                        ticks: { color: '#64748b' },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        // SpO2 Chart
+        const spo2Ctx = document.getElementById('spo2Chart').getContext('2d');
+        new Chart(spo2Ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Normal (95-100%)', 'Low (90-94%)', 'Critical (<90%)'],
+                datasets: [{
+                    data: [85, 12, 3],
+                    backgroundColor: ['#39ff14', '#f59e0b', '#ff4d6d'],
+                    borderColor: '#111827',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#e2e8f0' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

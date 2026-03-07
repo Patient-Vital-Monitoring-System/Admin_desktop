@@ -1,0 +1,305 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Vital Monitoring Admin</title>
+    <link rel="stylesheet" href="../css/vitalwear.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <nav class="navbar-top">
+        <h2 class="navbar-brand">Patient Vitals Admin</h2>
+    </nav>
+
+    <div class="page-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h5 class="sidebar-title">Menu</h5>
+            </div>
+            <nav class="sidebar-nav">
+                <a class="nav-link active" href="index.html">Dashboard</a>
+
+                <!-- User Management -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">User Management <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="users.html">User</a>
+                        <a class="nav-link" href="patients.html">Staff Directory</a>
+                        <a class="nav-link" href="user_status.html">User Status</a>
+                    </div>
+                </div>
+
+                <!-- Reports -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Reports <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="vitals_analytics.html">Vital Statistics</a>
+                        <a class="nav-link" href="audit_log.html">System Activity Log</a>
+                    </div>
+                </div>
+
+                <!-- Monitoring -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Monitoring <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="incidents.html">Incident Monitoring</a>
+                        <a class="nav-link" href="device_incidents.html">Device Overview</a>
+                        <a class="nav-link" href="vitals.html">User Activity</a>
+                    </div>
+                </div>
+
+                <!-- Accounts -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Accounts <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="profile.html">Profile</a>
+                        <a class="nav-link" href="logout.html" style="color: #ff4d6d;">Logout</a>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div style="padding: 32px 20px; max-width: 1400px; margin: 0 auto; width: 100%;">
+            <h1>Dashboard</h1>
+            <p>Real-time system overview and analytics.</p>
+
+            <!-- TOP ROW: METRIC CARDS -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">👥</div>
+                    <div class="metric-value" id="totalUsers">0</div>
+                    <div class="metric-label">Total Users</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">📱</div>
+                    <div class="metric-value" id="totalDevices">0</div>
+                    <div class="metric-label">Total Devices</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">🚨</div>
+                    <div class="metric-value" id="activeIncidents">0</div>
+                    <div class="metric-label">Active Incidents</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">✓</div>
+                    <div class="metric-value" id="completedIncidents">0</div>
+                    <div class="metric-label">Completed Incidents</div>
+                </div>
+            </div>
+
+            <!-- MIDDLE SECTION: CHARTS -->
+            <div class="charts-section">
+                <div class="chart-container">
+                    <h3>Incident Status Distribution</h3>
+                    <canvas id="incidentChart" style="max-width: 100%; height: 300px;"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Device Status Distribution</h3>
+                    <canvas id="deviceChart" style="max-width: 100%; height: 300px;"></canvas>
+                </div>
+            </div>
+
+            <!-- BOTTOM SECTION: ACTIVITY LOGS -->
+            <div class="activity-section">
+                <div class="activity-card">
+                    <h3>📋 Recent Activity Log</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Incident ID</th>
+                                <th>Patient</th>
+                                <th>Status</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentActivity">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="activity-card">
+                    <h3>✓ Recently Completed Incidents</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Incident ID</th>
+                                <th>Patient</th>
+                                <th>Completed</th>
+                            </tr>
+                        </thead>
+                        <tbody id="completedIncidentsTable">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="activity-card">
+                    <h3>⚙️ Devices Pending Verification</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Device ID</th>
+                                <th>Serial</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingDevices">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        // Check authentication
+        if (!localStorage.getItem('vw_token')) {
+            window.location.href = '../login.html';
+        }
+
+        // Mock Data
+        const mockData = {
+            users: 24,
+            devices: 15,
+            activeIncidents: 5,
+            completedIncidents: 47,
+            incidentStatus: [
+                { status: 'active', count: 3 },
+                { status: 'pending', count: 2 },
+                { status: 'completed', count: 35 },
+                { status: 'transferred', count: 8 },
+                { status: 'resolved', count: 4 }
+            ],
+            deviceStatus: [
+                { dev_status: 'available', count: 8 },
+                { dev_status: 'assigned', count: 4 },
+                { dev_status: 'maintenance', count: 2 },
+                { dev_status: 'inactive', count: 1 }
+            ],
+            recentActivity: [
+                { incident_id: 'INC-001', pat_name: 'Maria Santos', status: 'active', created_at: 'Feb 01, 2026 14:30' },
+                { incident_id: 'INC-002', pat_name: 'John Doe', status: 'pending', created_at: 'Feb 01, 2026 13:15' },
+                { incident_id: 'INC-003', pat_name: 'Jane Smith', status: 'active', created_at: 'Feb 01, 2026 12:00' },
+                { incident_id: 'INC-004', pat_name: 'Robert Brown', status: 'pending', created_at: 'Jan 31, 2026 22:45' },
+                { incident_id: 'INC-005', pat_name: 'Lisa Wilson', status: 'active', created_at: 'Jan 31, 2026 20:30' }
+            ],
+            completedIncidents: [
+                { incident_id: 'INC-010', pat_name: 'Michael Lee', updated_at: 'Jan 30, 2026 18:20' },
+                { incident_id: 'INC-009', pat_name: 'Sarah Davis', updated_at: 'Jan 30, 2026 16:45' },
+                { incident_id: 'INC-008', pat_name: 'David Miller', updated_at: 'Jan 29, 2026 14:30' },
+                { incident_id: 'INC-007', pat_name: 'Emily Johnson', updated_at: 'Jan 29, 2026 11:15' },
+                { incident_id: 'INC-006', pat_name: 'Chris Taylor', updated_at: 'Jan 28, 2026 09:00' }
+            ],
+            pendingDevices: [
+                { dev_id: 'DEV-003', dev_serial: 'VW-2024-003', dev_status: 'maintenance' },
+                { dev_id: 'DEV-007', dev_serial: 'VW-2024-007', dev_status: 'inactive' },
+                { dev_id: 'DEV-012', dev_serial: 'VW-2024-012', dev_status: 'maintenance' }
+            ]
+        };
+
+        // Update metric cards
+        document.getElementById('totalUsers').textContent = mockData.users;
+        document.getElementById('totalDevices').textContent = mockData.devices;
+        document.getElementById('activeIncidents').textContent = mockData.activeIncidents;
+        document.getElementById('completedIncidents').textContent = mockData.completedIncidents;
+
+        // Populate recent activity table
+        const recentActivityHTML = mockData.recentActivity.map(activity => `
+            <tr>
+                <td>${activity.incident_id}</td>
+                <td>${activity.pat_name}</td>
+                <td><span class="status-badge ${activity.status}">${activity.status}</span></td>
+                <td>${activity.created_at}</td>
+            </tr>
+        `).join('');
+        document.getElementById('recentActivity').innerHTML = recentActivityHTML;
+
+        // Populate completed incidents table
+        const completedHTML = mockData.completedIncidents.map(incident => `
+            <tr>
+                <td>${incident.incident_id}</td>
+                <td>${incident.pat_name}</td>
+                <td>${incident.updated_at}</td>
+            </tr>
+        `).join('');
+        document.getElementById('completedIncidentsTable').innerHTML = completedHTML;
+
+        // Populate pending devices table
+        const devicesHTML = mockData.pendingDevices.map(device => `
+            <tr>
+                <td>${device.dev_id}</td>
+                <td>${device.dev_serial}</td>
+                <td><span class="device-badge ${device.dev_status}">${device.dev_status}</span></td>
+            </tr>
+        `).join('');
+        document.getElementById('pendingDevices').innerHTML = devicesHTML;
+
+        // INCIDENT STATUS CHART
+        const incidentCtx = document.getElementById('incidentChart').getContext('2d');
+        const incidentLabels = mockData.incidentStatus.map(d => d.status.charAt(0).toUpperCase() + d.status.slice(1));
+        const incidentCounts = mockData.incidentStatus.map(d => d.count);
+        
+        new Chart(incidentCtx, {
+            type: 'doughnut',
+            data: {
+                labels: incidentLabels,
+                datasets: [{
+                    data: incidentCounts,
+                    backgroundColor: ['#ff4d6d', '#f59e0b', '#39ff14', '#00e5ff', '#a78bfa'],
+                    borderColor: '#111827',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#e2e8f0',
+                            font: { family: "'Space Mono', monospace", size: 12 }
+                        }
+                    }
+                }
+            }
+        });
+
+        // DEVICE STATUS CHART
+        const deviceCtx = document.getElementById('deviceChart').getContext('2d');
+        const deviceLabels = mockData.deviceStatus.map(d => d.dev_status.charAt(0).toUpperCase() + d.dev_status.slice(1));
+        const deviceCounts = mockData.deviceStatus.map(d => d.count);
+        
+        new Chart(deviceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: deviceLabels,
+                datasets: [{
+                    data: deviceCounts,
+                    backgroundColor: ['#39ff14', '#00e5ff', '#ff4d6d', '#f59e0b'],
+                    borderColor: '#111827',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#e2e8f0',
+                            font: { family: "'Space Mono', monospace", size: 12 }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

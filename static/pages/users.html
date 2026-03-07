@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User - Admin</title>
+    <link rel="stylesheet" href="../css/vitalwear.css">
+</head>
+<body>
+
+    <nav class="navbar-top">
+        <h2 class="navbar-brand">User Management</h2>
+    </nav>
+
+    <div class="page-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h5 class="sidebar-title">Menu</h5>
+            </div>
+            <nav class="sidebar-nav">
+                <a class="nav-link" href="index.html">Dashboard</a>
+
+                <!-- User Management -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">User Management <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link active" href="users.html">User</a>
+                        <a class="nav-link" href="user_status.html">User Status</a>
+                    </div>
+                </div>
+
+                <!-- Reports -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Reports <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="vitals_analytics.html">Vital Statistics</a>
+                        <a class="nav-link" href="audit_log.html">System Activity Log</a>
+                    </div>
+                </div>
+
+                <!-- Monitoring -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Monitoring <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="incidents.html">Incident Monitoring</a>
+                        <a class="nav-link" href="device_incidents.html">Device Overview</a>
+                        <a class="nav-link" href="vitals.html">User Activity</a>
+                    </div>
+                </div>
+
+                <!-- Accounts -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Accounts <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="profile.html">Profile</a>
+                        <a class="nav-link" href="logout.html" style="color: #ff4d6d;">Logout</a>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div style="padding: 32px 20px; max-width: 1400px; margin: 0 auto; width: 100%;">
+                <h1>User</h1>
+                <p>View and manage all system users and assigned roles.</p>
+
+                <!-- Top Controls -->
+                <div class="controls-section">
+                    <div class="controls-row">
+                        <button type="button" class="btn btn-primary" onclick="openAddUserModal()">+ Add New User</button>
+                        
+                        <div class="filter-group">
+                            <label for="roleFilter">Filter by Role:</label>
+                            <select id="roleFilter" class="filter-select" onchange="filterByRole()">
+                                <option value="">All Roles</option>
+                                <option value="admin">Admin</option>
+                                <option value="staff">Staff / Management</option>
+                                <option value="responder">Responder</option>
+                                <option value="rescuer">Rescuer</option>
+                            </select>
+                        </div>
+
+                        <form id="searchForm" class="search-form">
+                            <input type="text" id="searchInput" placeholder="Search by name or email..." class="search-input">
+                            <button type="submit" class="search-button">Search</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Users Table -->
+                <div class="card" style="margin-top: 24px;">
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Full Name</th>
+                                    <th>Role</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Last Login</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- User Details Modal -->
+    <div id="userDetailsModal" class="modal" style="display: none;">
+        <div class="modal-content" style="width: 500px;">
+            <div class="modal-header">
+                <h2>User Details</h2>
+                <button class="modal-close" onclick="closeUserDetailsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-section">
+                    <h4>Email</h4>
+                    <p id="detailEmail"></p>
+                </div>
+                <div class="detail-section">
+                    <h4>Role</h4>
+                    <p id="detailRole"></p>
+                </div>
+                <div class="detail-section">
+                    <h4>Account Created</h4>
+                    <p id="detailCreated"></p>
+                </div>
+                <div class="detail-section">
+                    <h4>Status</h4>
+                    <p id="detailStatus"></p>
+                </div>
+                <div class="detail-section">
+                    <h4>Last Login</h4>
+                    <p id="detailLastLogin"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeUserDetailsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit User Modal -->
+    <div id="userFormModal" class="modal" style="display: none;">
+        <div class="modal-content" style="width: 500px;">
+            <div class="modal-header">
+                <h2 id="formTitle">Add New User</h2>
+                <button class="modal-close" onclick="closeUserFormModal()">&times;</button>
+            </div>
+            <form id="userForm" onsubmit="handleUserFormSubmit(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="userId" value="">
+                    
+                    <div class="form-group">
+                        <label for="userName">Full Name *</label>
+                        <input type="text" id="userName" name="name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="userEmail">Email Address *</label>
+                        <input type="email" id="userEmail" name="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="userRole">Role *</label>
+                        <select id="userRole" name="role" required>
+                            <option value="">Select a role...</option>
+                            <option value="staff">Staff / Management</option>
+                            <option value="admin">Admin</option>
+                            <option value="responder">Responder</option>
+                            <option value="rescuer">Rescuer</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="passwordGroup">
+                        <label for="userPassword">Password *</label>
+                        <input type="password" id="userPassword" name="password" required>
+                        <small>Leave blank to keep existing password when editing</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeUserFormModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        // Check authentication
+        if (!localStorage.getItem('vw_token')) {
+            window.location.href = '../login.html';
+        }
+
+        // Mock Users Data
+        let usersData = [
+            { id: 1, name: 'Admin User', email: 'admin@vitalwear.com', role: 'admin', status: 'active', last_login: 'Now' },
+            { id: 2, name: 'John Responder', email: 'john@responder.com', role: 'responder', status: 'active', last_login: '5 mins ago' },
+            { id: 3, name: 'Jane Rescuer', email: 'jane@rescuer.com', role: 'rescuer', status: 'active', last_login: '10 mins ago' },
+            { id: 4, name: 'Sarah Wilson', email: 'sarah@responder.com', role: 'responder', status: 'active', last_login: '1 hour ago' },
+            { id: 5, name: 'David Brown', email: 'david@rescuer.com', role: 'rescuer', status: 'active', last_login: '2 hours ago' },
+            { id: 6, name: 'Mike Smith', email: 'mike@staff.com', role: 'staff', status: 'active', last_login: 'Yesterday' },
+            { id: 7, name: 'Emily Davis', email: 'emily@responder.com', role: 'responder', status: 'inactive', last_login: '3 days ago' },
+            { id: 8, name: 'Chris Taylor', email: 'chris@rescuer.com', role: 'rescuer', status: 'active', last_login: '3 hours ago' }
+        ];
+
+        // Render users table
+        function renderUsersTable() {
+            const tbody = document.getElementById('usersTable');
+            tbody.innerHTML = usersData.map(user => `
+                <tr>
+                    <td style="font-weight: 600; color: #00e5ff;">#${user.id}</td>
+                    <td>${user.name}</td>
+                    <td><span class="role-badge ${user.role}">${user.role}</span></td>
+                    <td>${user.email}</td>
+                    <td><span class="status-badge ${user.status}">${user.status}</span></td>
+                    <td style="color: #888; font-size: 12px;">${user.last_login}</td>
+                    <td style="white-space: nowrap;">
+                        <button type="button" class="btn-action btn-view" onclick="viewUserDetails(${user.id}, '${user.email}', '${user.role}', '${user.name}', '${user.status}')">View</button>
+                        <button type="button" class="btn-action btn-edit" onclick="editUser(${user.id}, '${user.email}', '${user.role}', '${user.name}')">Update</button>
+                        <button type="button" class="btn-action btn-delete" onclick="deleteUser(${user.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // View User Details
+        function viewUserDetails(id, email, role, name, status) {
+            document.getElementById('detailEmail').textContent = email;
+            document.getElementById('detailRole').innerHTML = `<span class="role-badge ${role}">${role}</span>`;
+            document.getElementById('detailCreated').textContent = 'Jan 15, 2026';
+            document.getElementById('detailStatus').innerHTML = status === 'active' ? '<span style="color: #10b981; font-weight: 600;">● Active</span>' : '<span style="color: #ff4d6d; font-weight: 600;">● Inactive</span>';
+            document.getElementById('detailLastLogin').textContent = 'Recent';
+            document.getElementById('userDetailsModal').style.display = 'flex';
+        }
+
+        function closeUserDetailsModal() {
+            document.getElementById('userDetailsModal').style.display = 'none';
+        }
+
+        // Add User Modal
+        function openAddUserModal() {
+            document.getElementById('formTitle').textContent = 'Add New User';
+            document.getElementById('userForm').reset();
+            document.getElementById('userId').value = '';
+            document.getElementById('passwordGroup').style.display = 'block';
+            document.getElementById('userPassword').required = true;
+            document.getElementById('userFormModal').style.display = 'flex';
+        }
+
+        function closeUserFormModal() {
+            document.getElementById('userFormModal').style.display = 'none';
+        }
+
+        // Edit User
+        function editUser(id, email, role, name) {
+            document.getElementById('formTitle').textContent = 'Edit User';
+            document.getElementById('userId').value = id;
+            document.getElementById('userName').value = name || '';
+            document.getElementById('userEmail').value = email;
+            document.getElementById('userRole').value = role;
+            document.getElementById('passwordGroup').style.display = 'none';
+            document.getElementById('userPassword').required = false;
+            document.getElementById('userFormModal').style.display = 'flex';
+        }
+
+        // Handle Form Submit
+        function handleUserFormSubmit(event) {
+            event.preventDefault();
+            const id = document.getElementById('userId').value;
+            const name = document.getElementById('userName').value;
+            const email = document.getElementById('userEmail').value;
+            const role = document.getElementById('userRole').value;
+
+            if (id) {
+                // Update existing
+                const index = usersData.findIndex(u => u.id === parseInt(id));
+                if (index !== -1) {
+                    usersData[index] = { ...usersData[index], name, email, role };
+                }
+                alert('User updated successfully!');
+            } else {
+                // Add new
+                const newId = Math.max(...usersData.map(u => u.id)) + 1;
+                usersData.push({ id: newId, name, email, role, status: 'active', last_login: 'Just now' });
+                alert('User created successfully!');
+            }
+            closeUserFormModal();
+            renderUsersTable();
+        }
+
+        // Delete User
+        function deleteUser(id) {
+            if (!confirm('Are you sure you want to permanently delete this user?')) {
+                return;
+            }
+            usersData = usersData.filter(u => u.id !== id);
+            renderUsersTable();
+            alert('User deleted successfully!');
+        }
+
+        // Filter by Role
+        function filterByRole() {
+            const role = document.getElementById('roleFilter').value;
+            if (!role) {
+                renderUsersTable();
+                return;
+            }
+            const filtered = usersData.filter(u => u.role === role);
+            const tbody = document.getElementById('usersTable');
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #888;">No users found.</td></tr>';
+            } else {
+                const originalData = usersData;
+                usersData = filtered;
+                renderUsersTable();
+                usersData = originalData;
+            }
+        }
+
+        // Search Form
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = usersData.filter(u => 
+                u.name.toLowerCase().includes(search) || 
+                u.email.toLowerCase().includes(search)
+            );
+            const tbody = document.getElementById('usersTable');
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #888;">No users found.</td></tr>';
+            } else {
+                const originalData = usersData;
+                usersData = filtered;
+                renderUsersTable();
+                usersData = originalData;
+            }
+        });
+
+        // Modal backdrop click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+        });
+
+        // Initial render
+        renderUsersTable();
+    </script>
+</body>
+</html>

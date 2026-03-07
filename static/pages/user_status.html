@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Status - Admin</title>
+    <link rel="stylesheet" href="../css/vitalwear.css">
+</head>
+<body>
+
+    <nav class="navbar-top">
+        <h2 class="navbar-brand">User Status</h2>
+    </nav>
+
+    <div class="page-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h5 class="sidebar-title">Menu</h5>
+            </div>
+            <nav class="sidebar-nav">
+                <a class="nav-link" href="index.html">Dashboard</a>
+
+                <!-- User Management -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">User Management <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="patients.html">Staff Directory</a>
+                        <a class="nav-link active" href="user_status.html">User Status</a>
+                    </div>
+                </div>
+
+                <!-- Reports -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Reports <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="vitals_analytics.html">Vital Statistics</a>
+                        <a class="nav-link" href="audit_log.html">System Activity Log</a>
+                    </div>
+                </div>
+
+                <!-- Monitoring -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Monitoring <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="incidents.html">Incident Monitoring</a>
+                        <a class="nav-link" href="device_incidents.html">Device Overview</a>
+                        <a class="nav-link" href="vitals.html">User Activity</a>
+                    </div>
+                </div>
+
+                <!-- Accounts -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Accounts <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="profile.html">Profile</a>
+                        <a class="nav-link" href="logout.html" style="color: #ff4d6d;">Logout</a>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div style="padding: 32px 20px; max-width: 1200px; margin: 0 auto; width: 100%;">
+                <h1>User Status</h1>
+                <p>Overview of all user statuses in the system.</p>
+
+                <!-- Status Summary -->
+                <div class="status-summary-grid">
+                    <div class="status-summary-card">
+                        <h3 class="status-summary-title">👥 Active Users</h3>
+                        <div class="status-summary-body">
+                            <div class="status-summary-metrics">
+                                <div class="status-summary-line">
+                                    <span class="status-summary-label">Total Active</span>
+                                    <span class="status-summary-value" id="activeUsers">18</span>
+                                </div>
+                                <div class="status-summary-line">
+                                    <span class="status-summary-label">Admins</span>
+                                    <span class="status-summary-value">2</span>
+                                </div>
+                                <div class="status-summary-line">
+                                    <span class="status-summary-label">Staff</span>
+                                    <span class="status-summary-value">4</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="status-summary-card">
+                        <h3 class="status-summary-title">🚑 Responders</h3>
+                        <div class="status-summary-body">
+                            <div class="status-summary-metrics">
+                                <div class="status-summary-line">
+                                    <span class="status-summary-label">Total Responders</span>
+                                    <span class="status-summary-value">8</span>
+                                </div>
+                                <div class="status-summary-line">
+                                    <span class="status-summary-label">On Duty</span>
+                                    <span class="status-summary-value">5</span>
+                                </div>
+                                <div class="status-summary-line">
+                                    <span class="status-summary-label">Off Duty</span>
+                                    <span class="status-summary-value">3</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="status-summary-card">
+                        <h3 class="status-summary-title">🏥 Rescuers</h3>
+                        <div class="status-summary-body">
+                            <div class="status-summary-metrics">
+                                <div class="status-summary-line">
+                                    <span class="status-summary-label">Total Rescuers</span>
+                                    <span class="status-summary-value">10</span>
+                                </div>
+                                <div class="status-summary-line">
+                                    <span class="status-summary-label">On Duty</span>
+                                    <span class="status-summary-value">7</span>
+                                </div>
+                                <div class="status-summary-line">
+                                    <span class="status-summary-label">Off Duty</span>
+                                    <span class="status-summary-value">3</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Status Table -->
+                <div class="card" style="margin-top: 24px;">
+                    <div class="card-header">User Status Details</div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Name</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Last Active</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userStatusTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        // Check authentication
+        if (!localStorage.getItem('vw_token')) {
+            window.location.href = '../login.html';
+        }
+
+        // Mock user status data
+        const userStatusData = [
+            { id: 1, name: 'Admin User', role: 'admin', status: 'active', last_active: 'Now' },
+            { id: 2, name: 'John Responder', role: 'responder', status: 'active', last_active: '5 mins ago' },
+            { id: 3, name: 'Jane Rescuer', role: 'rescuer', status: 'active', last_active: '10 mins ago' },
+            { id: 4, name: 'Sarah Wilson', role: 'responder', status: 'off-duty', last_active: '2 hours ago' },
+            { id: 5, name: 'David Brown', role: 'rescuer', status: 'active', last_active: 'Now' },
+            { id: 6, name: 'Mike Smith', role: 'staff', status: 'active', last_active: '1 hour ago' },
+            { id: 7, name: 'Emily Davis', role: 'responder', status: 'off-duty', last_active: '5 hours ago' },
+            { id: 8, name: 'Chris Taylor', role: 'rescuer', status: 'active', last_active: '15 mins ago' }
+        ];
+
+        // Render table
+        const tbody = document.getElementById('userStatusTable');
+        tbody.innerHTML = userStatusData.map(user => `
+            <tr>
+                <td style="font-weight: 600; color: #00e5ff;">#${user.id}</td>
+                <td>${user.name}</td>
+                <td><span class="role-badge ${user.role}">${user.role}</span></td>
+                <td><span class="status-badge ${user.status}">${user.status}</span></td>
+                <td>${user.last_active}</td>
+            </tr>
+        `).join('');
+    </script>
+</body>
+</html>
