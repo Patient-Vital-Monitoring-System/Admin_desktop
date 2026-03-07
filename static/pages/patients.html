@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Directory - Admin</title>
+    <link rel="stylesheet" href="../css/vitalwear.css">
+</head>
+<body>
+
+    <nav class="navbar-top">
+        <h2 class="navbar-brand">Staff Directory</h2>
+    </nav>
+
+    <div class="page-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h5 class="sidebar-title">Menu</h5>
+            </div>
+            <nav class="sidebar-nav">
+                <a class="nav-link" href="index.html">Dashboard</a>
+
+                <!-- User Management -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">User Management <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link active" href="patients.html">Staff Directory</a>
+                        <a class="nav-link" href="user_status.html">User Status</a>
+                    </div>
+                </div>
+
+                <!-- Reports -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Reports <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="vitals_analytics.html">Vital Statistics</a>
+                        <a class="nav-link" href="audit_log.html">System Activity Log</a>
+                    </div>
+                </div>
+
+                <!-- Monitoring -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Monitoring <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="incidents.html">Incident Monitoring</a>
+                        <a class="nav-link" href="device_incidents.html">Device Overview</a>
+                        <a class="nav-link" href="vitals.html">User Activity</a>
+                    </div>
+                </div>
+
+                <!-- Accounts -->
+                <div class="nav-group">
+                    <button class="nav-group-toggle">Accounts <span class="dropdown-arrow">▼</span></button>
+                    <div class="nav-group-items">
+                        <a class="nav-link" href="profile.html">Profile</a>
+                        <a class="nav-link" href="logout.html" style="color: #ff4d6d;">Logout</a>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div style="padding: 32px 20px; max-width: 1200px; margin: 0 auto; width: 100%;">
+                <h1>Staff Directory</h1>
+                <p>View and manage all field staff (Management, Responders, and Rescuers) below.</p>
+
+                <!-- Top Controls -->
+                <div class="controls-section">
+                    <div class="controls-row">
+                        <button type="button" class="btn btn-primary" onclick="openAddStaffModal()">+ Add Field Staff</button>
+
+                        <form id="searchForm" class="search-form">
+                            <input type="text" id="searchInput" placeholder="Search by name or email..." class="search-input">
+                            <button type="submit" class="search-button">Search</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Staff Table -->
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Contact</th>
+                                    <th>Role</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="staffTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Staff Details Modal -->
+    <div id="staffDetailsModal" class="modal" style="display: none;">
+        <div class="modal-content" style="width: 500px;">
+            <div class="modal-header">
+                <h2>Staff Details</h2>
+                <button class="modal-close" onclick="closeStaffDetailsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-section">
+                    <h4>Name</h4>
+                    <p id="detailName"></p>
+                </div>
+                <div class="detail-section">
+                    <h4>Email</h4>
+                    <p id="detailEmail"></p>
+                </div>
+                <div class="detail-section">
+                    <h4>Contact</h4>
+                    <p id="detailContact"></p>
+                </div>
+                <div class="detail-section">
+                    <h4>Role</h4>
+                    <p id="detailRole"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeStaffDetailsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Staff Modal -->
+    <div id="staffFormModal" class="modal" style="display: none;">
+        <div class="modal-content" style="width: 500px;">
+            <div class="modal-header">
+                <h2 id="staffFormTitle">Add Field Staff</h2>
+                <button class="modal-close" onclick="closeStaffFormModal()">&times;</button>
+            </div>
+            <form id="staffForm" onsubmit="handleStaffFormSubmit(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="staffId" value="">
+
+                    <div class="form-group">
+                        <label for="staffName">Full Name *</label>
+                        <input type="text" id="staffName" name="name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="staffEmail">Email Address *</label>
+                        <input type="email" id="staffEmail" name="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="staffContact">Contact</label>
+                        <input type="text" id="staffContact" name="contact">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="staffRole">Role *</label>
+                        <select id="staffRole" name="role" required>
+                            <option value="">Select role...</option>
+                            <option value="staff">Management / Staff</option>
+                            <option value="responder">Responder</option>
+                            <option value="rescuer">Rescuer</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="staffPasswordGroup">
+                        <label for="staffPassword">Password *</label>
+                        <input type="password" id="staffPassword" name="password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeStaffFormModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        // Check authentication
+        if (!localStorage.getItem('vw_token')) {
+            window.location.href = '../login.html';
+        }
+
+        // Mock Staff Data
+        let staffData = [
+            { id: 1, name: 'John Responder', email: 'john@responder.com', contact: '+63 912 345 6789', role: 'responder' },
+            { id: 2, name: 'Jane Rescuer', email: 'jane@rescuer.com', contact: '+63 917 234 5678', role: 'rescuer' },
+            { id: 3, name: 'Mike Smith', email: 'mike@staff.com', contact: '+63 918 345 6789', role: 'staff' },
+            { id: 4, name: 'Sarah Wilson', email: 'sarah@responder.com', contact: '+63 919 456 7890', role: 'responder' },
+            { id: 5, name: 'David Brown', email: 'david@rescuer.com', contact: '+63 920 567 8901', role: 'rescuer' },
+            { id: 6, name: 'Emily Davis', email: 'emily@staff.com', contact: '+63 921 678 9012', role: 'staff' }
+        ];
+
+        // Render staff table
+        function renderStaffTable() {
+            const tbody = document.getElementById('staffTable');
+            tbody.innerHTML = staffData.map(person => `
+                <tr>
+                    <td>
+                        <button class="link-button" onclick="viewStaffDetails('${person.name}', '${person.email}', '${person.contact}', '${person.role}')">
+                            ${person.name}
+                        </button>
+                    </td>
+                    <td>${person.email}</td>
+                    <td>${person.contact}</td>
+                    <td>
+                        <span class="role-badge ${person.role}">${person.role}</span>
+                    </td>
+                    <td style="white-space: nowrap;">
+                        <button type="button" class="btn-action btn-view" onclick="viewStaffDetails('${person.name}', '${person.email}', '${person.contact}', '${person.role}')">View</button>
+                        <button type="button" class="btn-action btn-edit" onclick="editStaff(${person.id}, '${person.name}', '${person.email}', '${person.role}', '${person.contact}')">Update</button>
+                        <button type="button" class="btn-action btn-delete" onclick="deleteStaff(${person.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // View staff details
+        function viewStaffDetails(name, email, contact, role) {
+            document.getElementById('detailName').textContent = name || 'N/A';
+            document.getElementById('detailEmail').textContent = email || 'N/A';
+            document.getElementById('detailContact').textContent || 'N/A';
+            document.getElementById('detailRole').innerHTML = `<span class="role-badge ${role}">${role}</span>`;
+            document.getElementById('staffDetailsModal').style.display = 'flex';
+        }
+
+        function closeStaffDetailsModal() {
+            document.getElementById('staffDetailsModal').style.display = 'none';
+        }
+
+        function openAddStaffModal() {
+            document.getElementById('staffFormTitle').textContent = 'Add Field Staff';
+            document.getElementById('staffForm').reset();
+            document.getElementById('staffId').value = '';
+            document.getElementById('staffPasswordGroup').style.display = 'block';
+            document.getElementById('staffPassword').required = true;
+            document.getElementById('staffFormModal').style.display = 'flex';
+        }
+
+        function closeStaffFormModal() {
+            document.getElementById('staffFormModal').style.display = 'none';
+        }
+
+        function editStaff(id, name, email, role, contact) {
+            document.getElementById('staffFormTitle').textContent = 'Edit Field Staff';
+            document.getElementById('staffId').value = id;
+            document.getElementById('staffName').value = name || '';
+            document.getElementById('staffEmail').value = email || '';
+            document.getElementById('staffRole').value = role || '';
+            document.getElementById('staffContact').value = contact || '';
+            document.getElementById('staffPasswordGroup').style.display = 'none';
+            document.getElementById('staffPassword').required = false;
+            document.getElementById('staffFormModal').style.display = 'flex';
+        }
+
+        function handleStaffFormSubmit(event) {
+            event.preventDefault();
+            const id = document.getElementById('staffId').value;
+            const name = document.getElementById('staffName').value;
+            const email = document.getElementById('staffEmail').value;
+            const role = document.getElementById('staffRole').value;
+            const contact = document.getElementById('staffContact').value;
+
+            if (id) {
+                // Update existing
+                const index = staffData.findIndex(s => s.id === parseInt(id));
+                if (index !== -1) {
+                    staffData[index] = { ...staffData[index], name, email, role, contact };
+                }
+                alert('Staff updated successfully!');
+            } else {
+                // Add new
+                const newId = Math.max(...staffData.map(s => s.id)) + 1;
+                staffData.push({ id: newId, name, email, role, contact });
+                alert('Staff created successfully!');
+            }
+            closeStaffFormModal();
+            renderStaffTable();
+        }
+
+        function deleteStaff(id) {
+            if (!confirm('Are you sure you want to permanently delete this staff member?')) {
+                return;
+            }
+            staffData = staffData.filter(s => s.id !== id);
+            renderStaffTable();
+            alert('Staff deleted successfully!');
+        }
+
+        // Search functionality
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = staffData.filter(s => 
+                s.name.toLowerCase().includes(search) || 
+                s.email.toLowerCase().includes(search)
+            );
+            const tbody = document.getElementById('staffTable');
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #888;">No staff found.</td></tr>';
+            } else {
+                // Re-render with filtered data
+                const originalData = staffData;
+                staffData = filtered;
+                renderStaffTable();
+                staffData = originalData;
+            }
+        });
+
+        // Modal backdrop click to close
+        document.querySelectorAll('.modal').forEach(function(modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+        });
+
+        // Initial render
+        renderStaffTable();
+    </script>
+</body>
+</html>

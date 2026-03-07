@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logout - VitalWear</title>
+    <link rel="stylesheet" href="../css/vitalwear.css">
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="login-card">
+            <div class="login-logo">
+                <div class="pulse-ring">
+                    <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                </div>
+                <div class="brand">Vital<span>Wear</span></div>
+                <div class="sub">EMERGENCY RESPONSE SYSTEM</div>
+            </div>
+
+            <div style="text-align: center; padding: 20px;">
+                <p style="color: var(--muted); margin-bottom: 24px;">You have been successfully logged out.</p>
+                <button class="btn-login" onclick="goToLogin()">BACK TO LOGIN</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Clear session
+        localStorage.removeItem('vw_token');
+        localStorage.removeItem('vw_user');
+
+        function goToLogin() {
+            window.location.href = '../login.html';
+        }
+    </script>
+</body>
+</html>
