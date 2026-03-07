@@ -124,6 +124,26 @@ try {
 } catch (Exception $e) {
     error_log('Audit log query failed: ' . $e->getMessage());
 }
+
+// GENERAL ACTIVITY LOG
+$stmt = $pdo->query("
+    SELECT user_name, user_role, action_type, module, created_at
+    FROM activity_log
+    ORDER BY created_at DESC
+    LIMIT 50
+");
+$activity_logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+// ACTIVITY SUMMARY FOR CHART
+$stmt = $pdo->query("
+    SELECT action_type, COUNT(*) as total
+    FROM activity_log
+    GROUP BY action_type
+");
+$activity_chart = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -275,6 +295,57 @@ try {
                     </div>
                 </div>
             </div>
+
+            <div class="audit-section">
+<h2>📋 System Activity Log</h2>
+<p style="margin-bottom:20px;color:var(--muted);">
+Complete history of system actions performed by responders, rescuers, management, and administrators.
+</p>
+
+<div class="charts-section" style="margin:0 0 32px 0;">
+<div class="chart-container">
+<h3>System Activity Distribution</h3>
+<canvas id="activityChart" style="max-height:260px;"></canvas>
+</div>
+</div>
+
+<div class="card">
+<div class="card-body">
+<table class="table">
+<thead>
+<tr>
+<th>User</th>
+<th>Role</th>
+<th>Action</th>
+<th>Module</th>
+<th>Timestamp</th>
+</tr>
+</thead>
+
+<tbody>
+<?php foreach ($activity_logs as $log): ?>
+<tr>
+<td><?php echo htmlspecialchars($log['user_name']); ?></td>
+
+<td style="text-transform:capitalize;">
+<?php echo htmlspecialchars($log['user_role']); ?>
+</td>
+
+<td><?php echo htmlspecialchars($log['action_type']); ?></td>
+
+<td><?php echo htmlspecialchars($log['module']); ?></td>
+
+<td>
+<?php echo date('M d, Y g:i A', strtotime($log['created_at'])); ?>
+</td>
+</tr>
+<?php endforeach; ?>
+
+</tbody>
+</table>
+</div>
+</div>
+</div>
 
             <!-- DEVICE ASSIGNMENT AUDIT LOG -->
             <div class="audit-section">
@@ -491,6 +562,71 @@ try {
                 }
             });
         });
+
+        // System Activity Chart (HORIZONTAL BAR)
+document.addEventListener('DOMContentLoaded', function () {
+
+    const activityCtx = document.getElementById('activityChart');
+    if (!activityCtx) return;
+
+    const activityData = <?php echo json_encode($activity_chart); ?>;
+
+    const labels = activityData.map(a => a.action_type);
+    const values = activityData.map(a => Number(a.total));
+
+    new Chart(activityCtx.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Total Activities',
+                data: values,
+                backgroundColor: [
+                    '#00e5ff',
+                    '#ff4d6d',
+                    '#2ecc71',
+                    '#f1c40f',
+                    '#9b59b6',
+                    '#3498db'
+                ],
+                borderRadius: 6,
+                barThickness: 30
+            }]
+        },
+        options: {
+            indexAxis: 'y', // makes bars horizontal
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#a0aec0'
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#a0aec0'
+                    },
+                    grid: {
+                        color: 'rgba(255,255,255,0.05)'
+                    }
+                },
+                y: {
+                    ticks: {
+                        color: '#a0aec0'
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+});
+
     </script>
 </body>
 </html>

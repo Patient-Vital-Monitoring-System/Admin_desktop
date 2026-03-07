@@ -11,7 +11,11 @@ function createWindow() {
     }
   });
 
-  win.loadFile('index.html');
+  // Since the application uses PHP, it must be served via a web server (XAMPP).
+  // Loading PHP files directly with loadFile() results in a white page because PHP isn't executed.
+  // Ensure XAMPP (Apache & MySQL) is running before starting the app.
+  win.loadURL('http://localhost/Admin_desktop/public/login.php');
+  // win.webContents.openDevTools(); // Uncomment this line to debug errors in the console
 }
 
 app.whenReady().then(createWindow);
