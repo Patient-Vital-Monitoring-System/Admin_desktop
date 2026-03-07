@@ -81,13 +81,6 @@
                 </div>
 
                 <div class="summary-card">
-                    <div class="summary-icon">✅</div>
-                    <div class="summary-value" id="completedCount">0</div>
-                    <div class="summary-label">Completed Incidents</div>
-                    <div class="summary-subtext">Resolved & Closed</div>
-                </div>
-
-                <div class="summary-card">
                     <div class="summary-icon">⏱️</div>
                     <div class="summary-value" id="avgDuration">0 hrs</div>
                     <div class="summary-label">Average Duration</div>
@@ -131,11 +124,6 @@
                     </div>
 
                     <div class="stat-box">
-                        <div class="stat-title">Completion Rate</div>
-                        <div class="stat-number" id="completionRate">0%</div>
-                    </div>
-
-                    <div class="stat-box">
                         <div class="stat-title">Transfer Rate</div>
                         <div class="stat-number" id="transferRate">0%</div>
                     </div>
@@ -175,19 +163,16 @@
         // Calculate statistics
         const ongoing = incidentsData.filter(i => i.status === 'active' || i.status === 'pending').length;
         const transferred = incidentsData.filter(i => i.status === 'transferred').length;
-        const completed = incidentsData.filter(i => i.status === 'completed' || i.status === 'resolved').length;
         const total = incidentsData.length;
         const avgDuration = (incidentsData.reduce((sum, i) => sum + i.duration_hours, 0) / total).toFixed(1);
 
         // Update summary cards
         document.getElementById('ongoingCount').textContent = ongoing;
         document.getElementById('transferredCount').textContent = transferred;
-        document.getElementById('completedCount').textContent = completed;
         document.getElementById('avgDuration').textContent = avgDuration + ' hrs';
 
         // Update statistics
         document.getElementById('totalIncidents').textContent = total;
-        document.getElementById('completionRate').textContent = total > 0 ? ((completed / total) * 100).toFixed(1) + '%' : '0%';
         document.getElementById('transferRate').textContent = total > 0 ? ((transferred / total) * 100).toFixed(1) + '%' : '0%';
         document.getElementById('activeRate').textContent = total > 0 ? ((ongoing / total) * 100).toFixed(1) + '%' : '0%';
 

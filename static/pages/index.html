@@ -83,11 +83,6 @@
                     <div class="metric-value" id="activeIncidents">0</div>
                     <div class="metric-label">Active Incidents</div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-icon">✓</div>
-                    <div class="metric-value" id="completedIncidents">0</div>
-                    <div class="metric-label">Completed Incidents</div>
-                </div>
             </div>
 
             <!-- MIDDLE SECTION: CHARTS -->
@@ -116,21 +111,6 @@
                             </tr>
                         </thead>
                         <tbody id="recentActivity">
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="activity-card">
-                    <h3>✓ Recently Completed Incidents</h3>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Incident ID</th>
-                                <th>Patient</th>
-                                <th>Completed</th>
-                            </tr>
-                        </thead>
-                        <tbody id="completedIncidentsTable">
                         </tbody>
                     </table>
                 </div>
@@ -167,13 +147,10 @@
             users: 24,
             devices: 15,
             activeIncidents: 5,
-            completedIncidents: 47,
             incidentStatus: [
                 { status: 'active', count: 3 },
                 { status: 'pending', count: 2 },
-                { status: 'completed', count: 35 },
-                { status: 'transferred', count: 8 },
-                { status: 'resolved', count: 4 }
+                { status: 'transferred', count: 8 }
             ],
             deviceStatus: [
                 { dev_status: 'available', count: 8 },
@@ -188,13 +165,6 @@
                 { incident_id: 'INC-004', pat_name: 'Robert Brown', status: 'pending', created_at: 'Jan 31, 2026 22:45' },
                 { incident_id: 'INC-005', pat_name: 'Lisa Wilson', status: 'active', created_at: 'Jan 31, 2026 20:30' }
             ],
-            completedIncidents: [
-                { incident_id: 'INC-010', pat_name: 'Michael Lee', updated_at: 'Jan 30, 2026 18:20' },
-                { incident_id: 'INC-009', pat_name: 'Sarah Davis', updated_at: 'Jan 30, 2026 16:45' },
-                { incident_id: 'INC-008', pat_name: 'David Miller', updated_at: 'Jan 29, 2026 14:30' },
-                { incident_id: 'INC-007', pat_name: 'Emily Johnson', updated_at: 'Jan 29, 2026 11:15' },
-                { incident_id: 'INC-006', pat_name: 'Chris Taylor', updated_at: 'Jan 28, 2026 09:00' }
-            ],
             pendingDevices: [
                 { dev_id: 'DEV-003', dev_serial: 'VW-2024-003', dev_status: 'maintenance' },
                 { dev_id: 'DEV-007', dev_serial: 'VW-2024-007', dev_status: 'inactive' },
@@ -206,7 +176,6 @@
         document.getElementById('totalUsers').textContent = mockData.users;
         document.getElementById('totalDevices').textContent = mockData.devices;
         document.getElementById('activeIncidents').textContent = mockData.activeIncidents;
-        document.getElementById('completedIncidents').textContent = mockData.completedIncidents;
 
         // Populate recent activity table
         const recentActivityHTML = mockData.recentActivity.map(activity => `
@@ -218,18 +187,6 @@
             </tr>
         `).join('');
         document.getElementById('recentActivity').innerHTML = recentActivityHTML;
-
-        // Populate completed incidents table
-        const completedHTML = mockData.completedIncidents.map(incident => `
-            <tr>
-                <td>${incident.incident_id}</td>
-                <td>${incident.pat_name}</td>
-                <td>${incident.updated_at}</td>
-            </tr>
-        `).join('');
-        document.getElementById('completedIncidentsTable').innerHTML = completedHTML;
-
-        // Populate pending devices table
         const devicesHTML = mockData.pendingDevices.map(device => `
             <tr>
                 <td>${device.dev_id}</td>
